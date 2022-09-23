@@ -19,3 +19,6 @@ Code for processing the data! Currently empty.
 
 ## mirrored-websites
 The mirrored websites. Currently, DIT info page and DID change password page.
+
+## backup_mitm_logs
+Backed up MITM logs. Currently, obviously, empty.
