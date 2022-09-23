@@ -27,11 +27,15 @@ do
   
   # Run, and kill by broken pipe
   # Note: this requires a modified MITM
-  pathtomitm = "" # CHANGE TO WHERE MITM IS
-  sudo node "$pathtomitm"/mitm.js -n "$running_cont" -i "$ip" -p "$3" --auto-access --auto-access-fixed 2 --debug | sed -n -e "/Container's OpenSSH server ended connection/q"
+  pathtomitm = "" # CHANGE TO WHERE MITM IS TODO
+  sudo node "$pathtomitm"/mitm.js -n "$running_cont" -i "$ip" -p "$3" --auto-access --auto-access-fixed 1 --debug | sed -n -e "/Container's OpenSSH server ended connection/q"
   
   # Delete NAT rules right away
   /bin/bash /nat_rules "delete" "$ip" "$2" "$3"
+  
+  # In here, process/move/zip up the MITM log data
+  # I don't know how to best do it, but if we can make it a new file, that'd be nice for modular
+  # TODO
   
   # Process the complete container: move downloaded files, get the logs, etc.
   /bin/bash /process_complete_container "$running_cont"
@@ -43,14 +47,4 @@ do
   sleep 5
   
  done
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   
