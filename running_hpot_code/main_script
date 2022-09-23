@@ -39,6 +39,7 @@ do
   # In here, process/move/zip up the MITM log data
   # I don't know how to best do it, but if we can make it a new file, that'd be nice for modular
   # TODO
+  # Also apache?
   
   # Process the complete container: move downloaded files, get the logs, etc.
   /bin/bash ./process_complete_container "$running_cont"
