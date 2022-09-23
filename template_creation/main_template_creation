@@ -1,0 +1,21 @@
+#!/bin/bash
+
+if [ ! $# -eq 2 ]
+then
+  echo "Usage: ./main_template_creation [template name] [path to website]"
+  exit 1
+fi
+
+# Steps/things to do here. Probably not exhaustive
+# When possible/appropriate, make code into a new script. It's easier to swap
+# code in and out that way
+
+# 1. Create the container, start it
+# 2. Install openssh
+# 3. Install apache
+# 4. (?) Set up the apache webserver
+# 5. Add additional honey
+# 6. Poison wget and curl
+
+
+# Note: we need to test how apache reacts to being copied lmao. Should be okay though.
