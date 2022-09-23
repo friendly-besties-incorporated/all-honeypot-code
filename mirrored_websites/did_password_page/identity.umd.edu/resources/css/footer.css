@@ -1,0 +1,72 @@
+/*Bootstrap was overwriting these properties that I want in the footer*/
+p {
+    margin:1em 0px;
+}
+
+hr{
+	display: block;
+    -webkit-margin-before: 0.5em;
+    -webkit-margin-after: 0.5em;
+    -webkit-margin-start: auto;
+    -webkit-margin-end: auto;
+    border-style: inset;
+    border-width: 1px;
+}
+
+.pageFooter{
+	background-color: #FFFFF5;
+	margin: 5px auto;
+	border: solid gray;
+	padding: 15px 25px;
+	display:table;
+	border-radius: 10px;
+}
+
+.footerContentContainer{
+	display:table-row;
+}
+
+.pageFooterText{
+	float:left;
+	display:table-cell;
+}
+
+.pageFooterImg{
+	float:right;
+	display:table-cell;
+	height: 60px;
+	width:205px;
+	background: url(../images/divit-logo-horizontal.gif) no-repeat;
+}
+
+.footerDisclaimer{
+	font-size:smaller;
+	margin-bottom:10px;
+	padding-top:5px;
+	padding-bottom:20px;
+}
+
+.footerDisclaimerText{
+	margin:0 5em;
+}
+
+.footerWarning{
+	color: #EB0000;
+}
+
+@media(max-width: 875px){
+	.pageFooterText{
+		float: none;
+		display: block;
+	}
+	
+	.footerContentContainer{
+		text-align:center;
+	}
+	
+	.pageFooterImg{
+		float: none;
+		margin: auto;
+		display: block;
+	}
+}

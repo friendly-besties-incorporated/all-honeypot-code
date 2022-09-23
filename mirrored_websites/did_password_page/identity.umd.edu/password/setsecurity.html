@@ -1,0 +1,249 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
+
+
+<html lang="en">
+
+<!-- Mirrored from identity.umd.edu/password/setsecurity by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 22 Sep 2022 22:04:59 GMT -->
+<!-- Added by HTTrack --><meta http-equiv="content-type" content="text/html;charset=ISO-8859-1" /><!-- /Added by HTTrack -->
+<head>
+	<title>Password Management</title>
+	<link rel="stylesheet" type="text/css" href="../resources/bootstrap/css/bootstrap.css"/>
+	<link rel="stylesheet" type="text/css" href="../resources/css/directory-tools.css" />
+	<link rel="stylesheet" type="text/css" href="../resources/css/password-mgmt.css" />
+	<link rel="stylesheet" type="text/css" href="../resources/bootstrap/css/datepicker.css"/>
+	<link rel="stylesheet" type="text/css" href="../resources/css/dirid-profile.css" />
+	<!--
+	<script type="text/javascript" src="../resources/bootstrap/scripts/jquery.js"></script>
+	<script type="text/javascript" src="../resources/scripts/jquery/jquery-ui-1.9.2.js"></script>
+	<script type="text/javascript" src="../resources/bootstrap/scripts/bootstrap-datepicker.js"></script>
+	<script type="text/javascript" src="../resources/bootstrap/scripts/bootstrap.js"></script>
+	<script type="text/javascript" src="../resources/scripts/password-scripts.js"></script>
+	<script type="text/javascript" src="../resources/scripts/global-scripts.js"></script>
+	-->
+</head>
+<body>
+	<div id="umd-frame">
+		
+
+
+
+
+
+
+
+
+<div class="DisplayVersion">1.34.1</div>
+<div class="UMDHeader"></div>
+		<div id="content-wrapper">
+			
+				
+					
+
+<link rel="stylesheet" type="text/css" href="../resources/css/set-security.css" />
+<div class="DisplayElement">
+	<h1>Passphrase Security Questions</h1>
+	
+	
+		<div class="sectionInfoPanel">
+			Your answers to the Passphrase Security Questions will provide information that will 
+			be used to verify your identity if you forget your passphrase.
+		</div>
+		<div class="sectionInfoPanel">
+			If you haven't already, you may consider also setting up a verified phone which can be used as an alternate
+			method of verifying your identity. You can do this by visiting your <a href="">Directory Profile page</a>.
+		</div>
+		<div class="sectionInfoPanel">
+			If you have an Associate Account Email, you will be unable to set Security 
+			Questions for that Associate Account.
+		</div>
+		<div class="DisplayElementModuleContainer">
+			<form id="securityQuestionForm" action="" method="post"> <!-- onsubmit="preventDoubleSubmission(event);"-->
+				
+					<div class="DisplayElementModule credentials">
+						<div class="SubDisplayElementContainer">
+							<label for="securityQuestions.dirId">Directory ID</label>
+							<div class="inputContainer">
+								<input id="securityQuestions.dirId" name="securityQuestions.dirId" type="text" autofocus="true" class="SubDisplayElement value" required="true" value=""/>
+							</div>
+						</div>
+						<div class="SubDisplayElementContainer">
+							<label for="securityQuestions.password">Passphrase</label>
+							<div class="inputContainer">
+								<input id="securityQuestions.password" name="securityQuestions.password" type="password" class="SubDisplayElement value" required="true" value=""/>
+							</div>
+						</div>
+					</div>
+				
+				<p class="setSecurity"><strong>Instructions:</strong> Select a question from each set. Please supply an answer for all three questions that you will remember in years to come.</p>
+				<div class="DisplayElementModule qAndASection">
+					
+					
+						<div class="SubDisplayElementContainer">
+							<label for="securityQuestions.questions0" class="qAndALabels">Question 1:</label>
+							<div class="inputContainer">
+								<select id="securityQuestions.questions0" name="securityQuestions.questions[0]" class="SubDisplayElement value">
+									
+										<option value="q1">Your favorite pastime/hobby?</option>
+										
+									
+										<option value="q2">Your favorite subject in school?</option>
+										
+									
+										<option value="q3">Name of your favorite musician/musical group</option>
+										
+									
+										<option value="q4">Your favorite beverage?</option>
+										
+									
+										<option value="q5">A pet you would like most to have?</option>
+										
+									
+										<option value="q6">Your least favorite subject in school?</option>
+										
+									
+										<option value="q7">The name of your least favorite musician/musical group?</option>
+										
+									
+										<option value="q8">Your favorite meal?</option>
+										
+									
+								</select>
+							</div>
+						</div>
+						<div class="SubDisplayElementContainer">
+							<label for="securityQuestions.answers0" class="qAndALabels">Answer 1:</label>
+							<div class="inputContainer">
+								<input id="securityQuestions.answers0" name="securityQuestions.answers[0]" pattern="[\S\s]*\S[\S\s]*" type="text" class="SubDisplayElement value answer" required="true" value=""/>
+							</div>
+						</div>
+					
+						<div class="SubDisplayElementContainer">
+							<label for="securityQuestions.questions1" class="qAndALabels">Question 2:</label>
+							<div class="inputContainer">
+								<select id="securityQuestions.questions1" name="securityQuestions.questions[1]" class="SubDisplayElement value">
+									
+										<option value="q9">The name of your favorite actor?</option>
+										
+									
+										<option value="q10">The name of your favorite movie?</option>
+										
+									
+										<option value="q11">The name of your favorite song?</option>
+										
+									
+										<option value="q12">Where you would like to travel someday?</option>
+										
+									
+										<option value="q13">What are the last 5 digits of your driver&#39;s license number?</option>
+										
+									
+										<option value="q14">What are the last 5 digits of your library card?</option>
+										
+									
+										<option value="q15">What is your shoe size?</option>
+										
+									
+										<option value="q16">What time were you born?</option>
+										
+									
+								</select>
+							</div>
+						</div>
+						<div class="SubDisplayElementContainer">
+							<label for="securityQuestions.answers1" class="qAndALabels">Answer 2:</label>
+							<div class="inputContainer">
+								<input id="securityQuestions.answers1" name="securityQuestions.answers[1]" pattern="[\S\s]*\S[\S\s]*" type="text" class="SubDisplayElement value answer" required="true" value=""/>
+							</div>
+						</div>
+					
+						<div class="SubDisplayElementContainer">
+							<label for="securityQuestions.questions2" class="qAndALabels">Question 3:</label>
+							<div class="inputContainer">
+								<select id="securityQuestions.questions2" name="securityQuestions.questions[2]" class="SubDisplayElement value">
+									
+										<option value="q17">What is your brother&#39;s/sister&#39;s middle name?</option>
+										
+									
+										<option value="q18">What is your Grandmother&#39;s maiden name?</option>
+										
+									
+										<option value="q19">What is your Grandfather&#39;s middle name?</option>
+										
+									
+										<option value="q20">What is the name of your childhood best friend?</option>
+										
+									
+										<option value="q21">What is the name of the first school you attended?</option>
+										
+									
+										<option value="q22">What is the name of the hospital that you were born in?</option>
+										
+									
+										<option value="q23">What is the name of your most significant teacher?</option>
+										
+									
+										<option value="q24">What is the name of your first pet?</option>
+										
+									
+								</select>
+							</div>
+						</div>
+						<div class="SubDisplayElementContainer">
+							<label for="securityQuestions.answers2" class="qAndALabels">Answer 3:</label>
+							<div class="inputContainer">
+								<input id="securityQuestions.answers2" name="securityQuestions.answers[2]" pattern="[\S\s]*\S[\S\s]*" type="text" class="SubDisplayElement value answer" required="true" value=""/>
+							</div>
+						</div>
+					
+					<div class="UpdateButtonContainer">
+						<input type="submit" value="Update Security Questions" name="updateSecurityQuestions" 
+								class="btn-panel-big updateSecurityQuestions"/>
+						<button class="btn-panel-big updateSecurityQuestions">Clear Fields</button> <!--onclick="document.getElementById('securityQuestionForm').reset();"-->
+					</div>
+				</div>
+			</form>
+		</div>
+	
+	
+	<a href="changepassword.html">Go to Main Passphrase Management Page</a>
+</div>
+				
+				
+				
+				
+				
+				
+				
+				
+				
+			
+<div class="pageFooter">
+	<div class="footerContentContainer">
+		<div class="pageFooterText">
+			<p>If you have problems with this page, please contact the <a href="">IT Service Desk</a> at 301.000.0000.</p>
+			<p><a href="">Web Accessibility</a></p>
+		</div>
+		<div class="pageFooterImg"></div>
+	</div>
+	<hr>
+	<div class="footerDisclaimer">
+		<p class="footerDisclaimerText">
+			NOTICE: Unauthorized access to this computer is in violation of Maryland Annotated Code, 
+			Criminal Law Article &sect;&sect; 8-606 and 7-302 and the Computer Fraud and Abuse Act, 18 U.S.C. &sect;&sect; 1030 et seq. 
+			The University may monitor use of its computing resources as permitted by state and federal law, including the 
+			Electronic Communications Privacy Act, 18 U.S.C. &sect;&sect; 2510-2521 and the Maryland Annotated Code, Courts and Judicial 
+			Proceedings Article, Section 10, Subtitle 4.  Anyone using this system acknowledges that all use is subject to the 
+			<a href="">University of Maryland Policy on the Acceptable Use of Information Technology Resources</a>.
+		</p>
+		<p class="footerDisclaimerText footerWarning">
+			By logging in to this/these application(s) I acknowledge and agree to all terms and  conditions regarding my access and the information contained therein.
+		</p>
+	</div>
+</div>
+		</div>
+	</div>
+</body>
+
+<!-- Mirrored from identity.umd.edu/password/forgotpassword by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 22 Sep 2022 22:04:58 GMT -->
+</html>

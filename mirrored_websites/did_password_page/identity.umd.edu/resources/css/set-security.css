@@ -1,0 +1,122 @@
+p.setSecurity{
+	text-align:center;
+	border-bottom:2px ridge #808080;
+	padding-top:10px;
+	padding-bottom: 10px;
+	border-top: 2px ridge #808080;
+}
+
+label{
+	text-align: right;
+	width: 40%;
+	margin: 5px 20px 5px 0px;
+    line-height: 20px;
+}
+
+.SubDisplayElementContainer{
+	display: -webkit-flex;
+	display: flex;
+	-webkit-justify-content: center;
+	justify-content: center;
+	-webkit-align-items: center;
+	align-items: center;
+}
+
+.inputContainer{
+	width: 50%;
+	text-align: left;
+}
+
+.SubDisplayElement.value{
+	padding: 4px;
+	border-radius: 10px;
+}
+
+select.SubDisplayElement.value{
+	width:80%;
+	padding: 5px;
+}
+
+input.SubDisplayElement.value.answer{
+	width:80%;
+	padding: 4px 5px;
+	border-radius: 10px;
+}
+
+.SubDisplayElement.qAndAlabels{
+	width:100px;
+}
+
+.DisplayElementModuleContainer{
+	width:100%;
+}
+
+.DisplayElementModule.qAndASection{
+	text-align:center;
+}
+
+.DisplayElementModule.credentials{
+	width:60%;
+	margin: 15px auto;
+}
+
+.updateSecurityQuestions{
+	width: 215px;
+}
+
+label.updateSecurityQuestions{
+	display:inline-block;
+	border:2px outset lightgray;
+	font: 16px Arial;
+	padding: 6px 6px 4px 6px;
+}
+
+@media(max-width: 1200px){
+	.DisplayElementModule.credentials{
+		width: auto;
+	}
+}
+
+@media(min-width: 950px){
+	select.SubDisplayElement.value{
+		width:70%;
+	}
+
+	input.SubDisplayElement.value.answer{
+		width:70%;
+		
+	}
+}
+
+@media(min-width: 1150px){
+	select.SubDisplayElement.value{
+		width:60%;
+	}
+
+	input.SubDisplayElement.value.answer{
+		width:60%;
+		
+	}
+}
+
+@media(min-width: 1550px){
+	select.SubDisplayElement.value{
+		width:50%;
+	}
+
+	input.SubDisplayElement.value.answer{
+		width:50%;
+		
+	}
+}
+
+@media(min-width: 1850px){
+	select.SubDisplayElement.value{
+		width:40%;
+	}
+
+	input.SubDisplayElement.value.answer{
+		width:40%;
+		
+	}
+}

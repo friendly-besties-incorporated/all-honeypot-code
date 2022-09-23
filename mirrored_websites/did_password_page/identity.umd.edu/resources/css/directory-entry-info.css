@@ -1,0 +1,31 @@
+p{
+	color:black;
+}
+
+h1{
+	font-size:18px;
+	font-weight:bold;
+	color:black;
+}
+
+.SubDisplayElementContainer.paragraph{
+	display: block;
+	text-align: center;
+}
+
+.SubDisplayElement.value.entry{
+	width:50%;
+	margin:0px;
+}
+
+.infoDisclaimer{
+	border:1px solid black;
+	padding:2px;
+	margin:0px;
+}
+
+.infoDiclaimerContainer{
+	border: 2px outset darkgray;
+	padding:4px;
+	margin-top: 40px;
+}

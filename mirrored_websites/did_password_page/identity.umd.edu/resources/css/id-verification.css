@@ -1,0 +1,57 @@
+.verificationButtons{
+	width: 216px;
+}
+
+label{
+	text-align: right;
+	width: 45%;
+	vertical-align: middle;
+	margin: 5px 20px 5px 0px;
+}
+
+label.verificationButtons{
+	display:inline-block;
+	border:2px outset lightgray;
+	font: 16px Arial;
+	padding: 6px 6px 4px 6px;
+}
+
+.SubDisplayElement.key{
+	text-align:right;
+	width: 45%;
+}
+
+.SubDisplayElement.value{
+	text-align:left;
+	width: 45%;
+}
+
+.inputValue{
+	width:180px;
+}
+
+.justifyCenter{
+	justify-content: center;
+}
+
+.displayFlex{
+	display: -webkit-flex;
+	display: flex;
+	-webkit-align-items: center;
+	align-items: center;
+}
+
+.SubDisplayElement{
+	width: 45%;
+}
+
+.selectWidth{
+	width: 115px;
+}
+
+.SubDisplayElement.value.multiValueField{
+	display: -webkit-flex;
+	display: flex;
+	-webkit-align-items: center;
+	align-items: center;
+}

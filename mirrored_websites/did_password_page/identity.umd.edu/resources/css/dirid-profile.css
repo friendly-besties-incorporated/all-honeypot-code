@@ -1,0 +1,276 @@
+h1 {
+	margin: 0;
+	width: 100%;
+}
+
+.dirH1Width {
+	width: 35%;
+}
+
+h4 {
+	text-align: center;
+}
+
+/* set this so we don't lose any of the dropdown menu */
+.DisplayElement {
+	min-height: 225px;
+}
+
+.DisplayElementModuleContainer {
+	width: 100%;
+}
+
+.SubDisplayElementContainer.centerBtn {
+	text-align: center;
+}
+
+.SubDisplayElement.key {
+	width: 49%;
+	text-align: right;
+	padding-right: 10px;
+}
+
+.SubDisplayElement.key.lockout {
+	vertical-align:top;
+}
+
+.SubDisplayElement.value {
+	width: 49%;
+	padding-left: 10px;
+	vertical-align: text-top;
+}
+
+.SubDisplayElement.value.terpinput {
+	width: 24%;
+	padding-left: 10px;
+	vertical-align: text-top;
+}
+
+.valueSwitch {
+	text-align: left;
+	display: inline-block;
+	padding: 5px 0px 0px 10px;
+	vertical-align: middle;
+}
+
+label {
+	vertical-align: middle;
+	color: #39393d;
+	margin-bottom: 0px;
+}
+
+label.changeTerpPassword {
+	text-align: right;
+	width:40%;
+	padding-right: 0px;
+}
+
+.ElementTitle {
+	text-align: center;
+}
+
+.container {
+	padding-top: 15px;
+	max-width: 300px;
+}
+
+.formContainer {
+	display: -webkit-flex;
+	display: flex;
+	align-items: center;
+}
+
+.noticeContainer {
+	text-align: center;
+}
+
+.profileContainer {
+	display: -webkit-flex;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.notice {
+	margin: 0em 0px;
+}
+
+.noticeBorder {
+	border-top: #d3d3d3;
+	border-top-width: 2px;
+	border-top-style: solid;
+}
+
+.panel {
+	border: 2px solid transparent;
+	margin-bottom: 5px;
+}
+
+.panel-default {
+	outline: 2px solid;
+	text-align: center;
+}
+
+.panel-heading {
+	border: transparent;
+}
+
+.panel-body-con {
+	place-content: center;
+}
+
+.panel-info {
+	border-color: #c75b5b;
+}
+.panel-notice {
+	padding: 10px;
+	text-align: center;
+}
+
+.form-control {
+	-webkit-box-shadow: none;
+	box-shadow: none;
+}
+
+/** may make this center, or remove altogether if revert back to key/value divs  **/
+.accountHelpLink {
+	text-align: left;
+}
+
+.kbArticle {
+	font-weight: bold;
+	color: black;
+	padding-right: 20px;
+}
+
+.menuContainer {
+    display: inline-block;
+    vertical-align: middle;
+    cursor: pointer;
+    padding: 2px 0px;
+}
+
+.radio {
+	width: 36px;
+}
+
+.inputDisplay {
+	display: -webkit-flex;
+	display: flex;
+	padding-top: 10px;
+	padding-left: 1px;
+}
+
+/******************************** 
+ * creating hamburger menu icon * 
+ ********************************/
+.bar1, .bar2, .bar3 {
+    width: 25px;
+    height: 4px;
+    background-color: #333;
+    margin: 3px 0;
+    transition: 0.4s;
+}
+
+.menuMenu {
+	font-size: 12px;
+	font-weight: 800;
+}
+
+.titleMenu {
+	display: -webkit-flex;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	margin-bottom: 10px;
+}
+
+.btn-default {
+	background-color: #FFFFF5;
+}
+
+.btn-cancel {
+	margin-top: 5px;
+}
+
+.dropdown-menu {
+	right: 0;
+	left: auto;
+	background-color: #FFFFF5;
+}
+
+/* add a little style to dropdown menu */
+.listBottomLine {
+	border-bottom-width: thin;
+    border-bottom-style:  ridge;
+    border-bottom-color:  darkgray;
+}
+
+.hidden {
+	display: none;
+}
+
+/* The switch - the box around the slider */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 30px;
+  height: 17px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {display:none;}
+
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 13px;
+  width: 13px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(13px);
+  -ms-transform: translateX(13px);
+  transform: translateX(13px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+a.profileTooltip, a.profileTooltip:hover, a.profileTooltip:visited {
+	cursor: help;
+	color:black;
+}
