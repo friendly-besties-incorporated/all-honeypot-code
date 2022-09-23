@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# This script will be the main script. It will take in a) container name to duplicate and b) the IP to map it to c) the mitm port
+# Ideally, we would turn it on once and then leave it on for the whole month. 
+
+if [ ! $# -eq 3 ]
+then
+  echo "Usage: ./main_script [template container name] [external IP] [MITM port]"
+  exit 1
+fi
+
+running_cont="$1_running"
+
+# This is where we'd "leave it on" for the whole month comes from.
+while true
+do
+  # Create the container
+  sudo lxc-copy -n "$1" -N "$running_cont"
+  sudo lxc-start -n "$running_cont"
+
+  sleep 5
+  
+  ip=$(sudo lxc-info -n "$snoopyrun" -iH)
+  
+  # Add NAT rules. For now, in a separate script
+  /bin/bash /nat_rules "add" "$ip" "$2" "$3"
+  
+  # Run, and kill by broken pipe
+  # Note: this requires a modified MITM
+  pathtomitm = "" # CHANGE TO WHERE MITM IS
+  sudo node "$pathtomitm"/mitm.js -n "$running_cont" -i "$ip" -p "$3" --auto-access --auto-access-fixed 2 --debug | sed -n -e "/Container's OpenSSH server ended connection/q"
+  
+  # Delete NAT rules right away
+  /bin/bash /nat_rules "delete" "$ip" "$2" "$3"
+  
+  # Process the complete container: move downloaded files, get the logs, etc.
+  /bin/bash /process_complete_container "$running_cont"
+  
+  # Delete the container
+  sudo lxc-stop -n "$running_cont"
+  sudo lxc-destroy -n "$running_cont"
+  
+  sleep 5
+  
+ done
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
