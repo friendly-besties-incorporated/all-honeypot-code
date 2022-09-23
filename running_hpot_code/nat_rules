@@ -15,6 +15,9 @@ then
   sudo iptables --table nat --insert POSTROUTING --source "$2" --destination 0.0.0.0/0 --jump SNAT --to-source "$3"
 
   sudo iptables --table nat --insert PREROUTING --source 0.0.0.0/0 --destination "$3" --protocol tcp --dport 22 --jump DNAT --to-destination "$myip":"$4"
+  
+  # TODO: Figure out if we need to add anything for the web servers. 
+  
  else
   sudo ip addr del "$3"/16 brd + dev enp4s2
   sudo iptables --table nat --delete PREROUTING --source 0.0.0.0/0 --destination "$3" --jump DNAT --to-destination "$2"
