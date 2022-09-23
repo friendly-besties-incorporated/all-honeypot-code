@@ -16,3 +16,6 @@ All code for creating the templates that are then copied in running-hpot-code. I
 
 ## data-processing
 Code for processing the data! Currently empty.
+
+## mirrored-websites
+The mirrored websites. Currently, DIT info page and DID change password page.
