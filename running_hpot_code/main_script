@@ -25,6 +25,9 @@ do
   # Add NAT rules. For now, in a separate script
   /bin/bash /nat_rules "add" "$ip" "$2" "$3"
   
+  # Probably start apache? Maybe start openssh?
+  # TODO Figure out if we need to start these services
+  
   # Run, and kill by broken pipe
   # Note: this requires a modified MITM
   pathtomitm = "" # CHANGE TO WHERE MITM IS TODO
