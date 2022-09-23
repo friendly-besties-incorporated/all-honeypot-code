@@ -1,0 +1,8 @@
+if [ ! $# -eq 1 ]
+then
+  echo "Usage: ./process_complete_container [container name]"
+  exit 1
+fi
+
+# This file will take in a container and process any files that are on it. For example, moving the
+# downloaded files to the sandbox, stuff like that.
