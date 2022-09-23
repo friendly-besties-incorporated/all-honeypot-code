@@ -10,12 +10,24 @@ fi
 # When possible/appropriate, make code into a new script. It's easier to swap
 # code in and out that way
 
-# 1. Create the container, start it
-# 2. Install openssh
-# 3. Install apache
-# 4. (?) Set up the apache webserver
-# 5. Add additional honey
-# 6. Poison wget and curl
+# Create it!
+sudo lxc-create -n "$1" -t download -- -d ubuntu -r focal -a amd64
+sudo lxc-start -n "$1"
+
+# Install openssh and apache
+sudo lxc-attach -n $1 -- bash -c "sudo apt-get install openssh-server"
+sudo lxc-attach -n $1 -- bash -c "sudo apt-get install apache2"
+
+# Set up apache!
+/bin/bash ./setup_apache "$1" "$2"
+
+# Add honey
+/bin/bash ./add_honey $1
+
+# Poison wget and curl
+/bin/bash ./poison_downloads $1
+
+# Is there anything else? TODO
 
 
 # Note: we need to test how apache reacts to being copied lmao. Should be okay though.
