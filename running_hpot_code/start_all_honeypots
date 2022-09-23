@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# Start all four honeypots. 
+# smthn like
+# /bin/bash ./main_script ...
