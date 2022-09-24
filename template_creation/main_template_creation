@@ -29,5 +29,7 @@ sudo lxc-attach -n $1 -- bash -c "sudo apt-get install apache2"
 
 # Is there anything else? TODO
 
+# Stop it
+sudo lxc-stop -n "$1
 
 # Note: we need to test how apache reacts to being copied lmao. Should be okay though.
