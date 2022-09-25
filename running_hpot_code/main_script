@@ -5,7 +5,7 @@
 
 if [ ! $# -eq 3 ]
 then
-  echo "Usage: ./main_script [template container name] [external IP] [MITM port]"
+  echo "Usage: ./main_script [template container name] [external IP] [MITM port] [interface]"
   exit 1
 fi
 
@@ -23,7 +23,7 @@ do
   ip=$(sudo lxc-info -n "$snoopyrun" -iH)
   
   # Add NAT rules. For now, in a separate script
-  /bin/bash ./nat_rules "add" "$ip" "$2" "$3"
+  /bin/bash ./nat_rules "add" "$ip" "$2" "$3" "$4"
   
   # Probably start apache? Maybe start openssh?
   # TODO Figure out if we need to start these services
@@ -34,7 +34,7 @@ do
   sudo node "$pathtomitm"/mitm.js -n "$running_cont" -i "$ip" -p "$3" --auto-access --auto-access-fixed 1 --debug | sed -n -e "/Container's OpenSSH server ended connection/q"
   
   # Delete NAT rules right away
-  /bin/bash ./nat_rules "delete" "$ip" "$2" "$3"
+  /bin/bash ./nat_rules "delete" "$ip" "$2" "$3" "$4"
   
   # In here, process/move/zip up the MITM log data
   # I don't know how to best do it, but if we can make it a new file, that'd be nice for modular
