@@ -11,6 +11,16 @@ fi
 
 running_cont="$1_running"
 
+pathtomitm = "../MITM" # CHANGE TO WHERE MITM IS IF NOT HERE
+
+path_to_logs="/var/mitm_logs/""$1"
+# Check if the folder for this template already exists
+if [ ! -d "$path_to_logs" ]
+then
+  sudo mkdir "$path_to_logs"
+fi
+
+
 # This is where we'd "leave it on" for the whole month comes from.
 while true
 do
@@ -30,19 +40,21 @@ do
   
   # Run, and kill by broken pipe
   # Note: this requires a modified MITM
-  pathtomitm = "" # CHANGE TO WHERE MITM IS TODO
   sudo node "$pathtomitm"/mitm.js -n "$running_cont" -i "$ip" -p "$3" --auto-access --auto-access-fixed 1 --debug | sed -n -e "/Container's OpenSSH server ended connection/q"
   
   # Delete NAT rules right away
   /bin/bash ./nat_rules "delete" "$ip" "$2" "$3" "$4"
   
-  # In here, process/move/zip up the MITM log data
-  # I don't know how to best do it, but if we can make it a new file, that'd be nice for modular
-  # TODO
-  # Also apache?
+  # In here, move the MITM data
+  # First, make the name the log will have
+  end_time=$( date "+%F-%T-%Z" )
+  log_name="$1""_""$end_time"
+  mitmfile=$( ls "$pathtomitm"/logs/session_streams -t | head -1 )
+  # Copy the file into the proper folder
+  cp "$pathtomitm"/logs/session_streams/"$mitmfile" "$path_to_logs""/""$log_name"
   
-  # Process the complete container: move downloaded files, get the logs, etc.
-  /bin/bash ./process_complete_container "$running_cont"
+  # Process the complete container: move downloaded files, anything else
+  /bin/bash ./process_complete_container "$running_cont" "$log_name"
   
   # Delete the container
   sudo lxc-stop -n "$running_cont"
