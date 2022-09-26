@@ -1,0 +1,89 @@
+html, body {
+    margin: 0;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    background-color: black;
+}
+
+header {
+    background: linear-gradient(90deg, rgba(122,22,13,1) 0%, rgba(216,46,32,1) 25%, rgba(122,22,13,1) 50%);;
+    height: 155px;
+}
+
+.content {
+    margin-top: -44;
+}
+
+form {
+    display: inline-block;
+    color: black;
+}
+
+label {
+    display: inline-block;
+    font-weight: bold;
+}
+
+.horizontal {
+    display: flex;
+    flex-direction: row;
+}
+
+.horizontal > * {
+    flex: 1;
+}
+
+#what-is-scms ul {
+    text-align: left;
+}
+
+input {
+    border-color: #d1d1e0;
+    border-style: inset;
+    border-width: 2px;
+    height: 32px;
+    border-radius: 7px;
+    display: inline-block;
+    margin: 8px;
+}
+
+input[type=submit] {
+    background-color: #333333;
+    color:white;
+    padding-left: 24;
+    padding-right: 24;
+}
+
+#umd-logo {
+    height: 45px;
+    width: auto;
+    margin-top: 16;
+    margin-left: 48;
+}
+
+#dit-logo {
+    height: 50px;
+    width: auto;
+}
+
+.card {
+    border: 2px;
+    border-color: #6F6F6F;
+    border-radius: 16px;
+    background-color: #FFFFF5;
+    width: 85%;
+    margin-left: auto;
+    margin-right: auto;
+    border-style: solid;
+    padding: 8;
+    text-align: center;
+    color: gray;
+    margin-bottom: 24px;
+}
+
+.disclaimer {
+    color:#444444;
+    font-size: 12;
+    text-align: left;
+    margin-left: 8%;
+    margin-right: 8%;
+}
