@@ -2,6 +2,8 @@
  * ---------------------- Required Packages START Block -----------------------------
  ************************************************************************************/
 
+const { exit } = require('process');
+
 const path            = require('path'),
       fs              = require('fs'),
       zlib            = require('zlib'),
@@ -583,6 +585,12 @@ function handleAttackerAuthCallback(err, lxc, authCtx, attacker) {
         lxc.end();
         screenWriteGZIP.end(); // end attacker session screen output write stream
         // Log sign out event
+
+        // exit if specified
+        if (options.exitAfterSession) {
+          infoLog("Attacker closed connection and exit after session flag specified, exiting now...")
+          exit();
+        }
       });
     });
     // Disconnect LXC client when attacker closes window
