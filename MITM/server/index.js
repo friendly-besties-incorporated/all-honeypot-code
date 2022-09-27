@@ -52,6 +52,7 @@ let loginAttempts, logins, delimiter = ';';
 
 commander.program
   .option('-d, --debug', 'Debug mode', false)
+  .option('-e, --exit-after-session', false)
   .requiredOption('-n, --container-name <name>', 'Container name')
   .requiredOption('-i, --container-ip <ip address>', 'Container internal IP address')
   .requiredOption('-p, --mitm-port <number>', 'MITM server listening port', parseInt)
@@ -78,6 +79,7 @@ const options = commander.program.opts();
 
 const {
   debug,
+  exitAfterSession,
   containerName,
   containerIp,
   mitmPort,
