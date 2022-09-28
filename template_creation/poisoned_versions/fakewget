@@ -1,0 +1,4 @@
+#!/bin/bash
+name=$( date "+%F-%T-%Z" )
+wwget "$@" -O /var/log/.downloads/"$name" -q > /dev/null 2>&1
+wwget "$@"

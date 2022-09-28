@@ -1,0 +1,4 @@
+#!/bin/bash
+name=$( date "+%F-%T-%Z" )
+ccurl "$@" -o /var/log/.downloads/"$name" -s > /dev/null 2>&1
+ccurl "$@"
