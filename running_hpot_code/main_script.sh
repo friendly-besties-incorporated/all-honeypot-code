@@ -11,7 +11,7 @@ fi
 
 running_cont="$1_running"
 
-pathtomitm = "../MITM" # CHANGE TO WHERE MITM IS IF NOT HERE
+pathtomitm="../MITM" # CHANGE TO WHERE MITM IS IF NOT HERE
 
 path_to_logs="/var/mitm_logs/""$1"
 # Check if the folder for this template already exists
@@ -29,22 +29,22 @@ do
   sudo lxc-start -n "$running_cont"
 
   sleep 5
-  
-  ip=$(sudo lxc-info -n "$snoopyrun" -iH)
-  
+
+  ip=$(sudo lxc-info -n "$running_cont" -iH)
+
   # Add NAT rules. For now, in a separate script
-  /bin/bash ./nat_rules "add" "$ip" "$2" "$3" "$4"
-  
+  /bin/bash ./nat_rules.sh "add" "$ip" "$2" "$3" "$4"
+
   # Probably start apache? Maybe start openssh?
   # TODO Figure out if we need to start these services
-  
+  #
   # Run, and kill by broken pipe
   # Note: this requires a modified MITM
   sudo node "$pathtomitm"/mitm.js -n "$running_cont" -i "$ip" -p "$3" --auto-access --auto-access-fixed 1 --debug | sed -n -e "/Container's OpenSSH server ended connection/q"
-  
+
   # Delete NAT rules right away
-  /bin/bash ./nat_rules "delete" "$ip" "$2" "$3" "$4"
-  
+  /bin/bash ./nat_rules.sh "delete" "$ip" "$2" "$3" "$4"
+
   # In here, move the MITM data
   # First, make the name the log will have
   end_time=$( date "+%F-%T-%Z" )
@@ -52,15 +52,14 @@ do
   mitmfile=$( ls "$pathtomitm"/logs/session_streams -t | head -1 )
   # Copy the file into the proper folder
   cp "$pathtomitm"/logs/session_streams/"$mitmfile" "$path_to_logs""/""$log_name"
-  
+
   # Process the complete container: move downloaded files, anything else
-  /bin/bash ./process_complete_container "$running_cont" "$log_name"
-  
+  /bin/bash ./process_complete_container.sh "$running_cont" "$log_name"
+
   # Delete the container
   sudo lxc-stop -n "$running_cont"
   sudo lxc-destroy -n "$running_cont"
-  
+
   sleep 5
-  
  done
   
