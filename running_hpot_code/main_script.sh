@@ -10,16 +10,22 @@ then
 fi
 
 running_cont="$1_running"
-
 pathtomitm="../MITM" # CHANGE TO WHERE MITM IS IF NOT HERE
 
-path_to_logs="/var/mitm_logs/""$1"
+# TODO currently this is repeated here and in process_complete. Gotta fix that
+path_to_log_store_hpothost="/var/experiment_logs/""$1"
+path_to_dl_store_sandbox="/var/experiment_downloads/""$1"
+
 # Check if the folder for this template already exists
-if [ ! -d "$path_to_logs" ]
+if [ ! -d "$path_to_log_store_hpothost" ]
 then
-  sudo mkdir "$path_to_logs"
+  sudo mkdir "$path_to_log_store_hpothost"
 fi
 
+# Make the sandbox folder. Send mkdir -p path to the sandbox container
+sandbox="10.2.0.2"
+ssh logs@$sandbox "sudo mkdir -p $path_to_dl_store_sandbox"
+# Not tested TODO
 
 # This is where we'd "leave it on" for the whole month comes from.
 while true
@@ -45,21 +51,16 @@ do
   # Delete NAT rules right away
   /bin/bash ./nat_rules.sh "delete" "$ip" "$2" "$3" "$4"
 
-  # In here, move the MITM data
-  # First, make the name the log will have
+  # All logs will have this same name
   end_time=$( date "+%F-%T-%Z" )
   log_name="$1""_""$end_time"
-  mitmfile=$( ls "$pathtomitm"/logs/session_streams -t | head -1 )
-  # Copy the file into the proper folder
-  cp "$pathtomitm"/logs/session_streams/"$mitmfile" "$path_to_logs""/""$log_name"
 
   # Process the complete container: move downloaded files, anything else
-  /bin/bash ./process_complete_container.sh "$running_cont" "$log_name"
+  /bin/bash ./process_complete_container.sh "$1" "$running_cont" "$log_name"
 
   # Delete the container
   sudo lxc-stop -n "$running_cont"
   sudo lxc-destroy -n "$running_cont"
 
   sleep 5
- done
-  
+done
