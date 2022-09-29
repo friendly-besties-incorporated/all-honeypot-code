@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ ! $# -eq 4 ]
+if [ ! $# -eq 5 ]
 then
   echo "Usage: ./nat_rules [add/delete] [container ip] [external ip] [mitm port] [interface]"
   exit 1

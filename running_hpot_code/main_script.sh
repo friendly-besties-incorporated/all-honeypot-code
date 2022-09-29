@@ -3,7 +3,7 @@
 # This script will be the main script. It will take in a) container name to duplicate and b) the IP to map it to c) the mitm port
 # Ideally, we would turn it on once and then leave it on for the whole month. 
 
-if [ ! $# -eq 3 ]
+if [ ! $# -eq 4 ]
 then
   echo "Usage: ./main_script [template container name] [external IP] [MITM port] [interface]"
   exit 1

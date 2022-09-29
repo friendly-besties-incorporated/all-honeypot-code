@@ -17,19 +17,21 @@ sudo lxc-start -n "$1"
 
 # Install openssh and apache
 sudo lxc-attach -n "$1" -- bash -c "sudo apt-get install openssh-server"
-if "$2" == "N"
+if [ -d "$2" ]
 then
   sudo lxc-attach -n "$1" -- bash -c "sudo apt-get install apache2"
 
   # Set up apache!
-  /bin/bash ./setup_apache "$1" "$2"
+  /bin/bash ./setup_apache.sh "$1" "$2"
 fi
 
 # Add honey
-/bin/bash ./add_honey "$1"
+echo "Adding honey..."
+/bin/bash ./add_honey.sh "$1"
 
 # Poison wget and curl
-/bin/bash ./poison_downloads "$1"
+echo "Poisoning downloads..."
+/bin/bash ./poison_downloads.sh "$1"
 
 # Is there anything else? TODO
 
