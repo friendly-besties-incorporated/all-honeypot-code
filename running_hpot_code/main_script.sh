@@ -13,8 +13,8 @@ running_cont="$1_running"
 pathtomitm="../MITM" # CHANGE TO WHERE MITM IS IF NOT HERE
 
 # TODO currently this is repeated here and in process_complete. Gotta fix that
-path_to_log_store_hpothost="/var/experiment_logs/""$1"
-path_to_dl_store_sandbox="/var/experiment_downloads/""$1"
+path_to_log_store_hpothost="$H_P_LOGSTORE""/""$1"
+path_to_dl_store_sandbox="$S_P_DLDSTORE""/""$1"
 
 # Check if the folder for this template already exists
 if [ ! -d "$path_to_log_store_hpothost" ]
@@ -23,7 +23,7 @@ then
 fi
 
 # Make the sandbox folder. Send mkdir -p path to the sandbox container
-sandbox="10.2.0.2"
+sandbox="$S_IP"
 ssh logs@$sandbox "sudo mkdir -p $path_to_dl_store_sandbox"
 # Not tested TODO
 

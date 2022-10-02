@@ -4,15 +4,15 @@ then
   exit 1
 fi
 
-cname="$1"
+cname="$2"
 tname="$1"
 path_to_mitm="../MITM"
-path_to_log_store_hpothost="/var/experiment_logs/""$tname"
-path_to_dl_store_sandbox="/var/experiment_downloads/""$tname"
+path_to_log_store_hpothost="$H_P_LOGSTORE""$tname"
+path_to_dl_store_sandbox="$S_P_DLDSTORE""$tname"
 path_to_container="/var/lib/lxc/$cname/rootfs" # need sudo
 
 # All logs will have this name, given by variables
-log_name="$2"
+log_name="$3"
 
 # STEP ONE: LOGS INTO HPOTHOST BACKUP
 # Find the most recent MITM file (possible data frace here)
@@ -28,8 +28,8 @@ mv "$log_name".zip "$path_to_log_store_hpothost"
 
 
 # STEP TWO: DOWNLOADS INTO SANDBOX VM
-sandbox="10.2.0.2"
-dir="/var/log/.downloads"
+sandbox="$S_IP"
+dir="$C_P_DLDS"
 
 sudo lxc-attach -n $cname -- bash -c "zip -r $log_name.zip $dir"
 sudo scp -i ~/.ssh/id_rsa.pub $path_to_container/$log_name.zip logs@$sandbox:~/$path_to_dl_store_sandbox/$log_name.zip
