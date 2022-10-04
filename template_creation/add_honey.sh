@@ -6,5 +6,16 @@ then
   exit 1
 fi
 
-# Add honey here! We still need to decide what else will exist in the containers,
-# but we do need at least something to sit here
+CONTAINER_NAME=$1
+
+CMDS=()
+
+CMDS+=("sudo apt install nodejs")
+CMDS+=("echo --- node things ---")
+CMDS+=("sudo apt remove nodejs")
+
+# Execute CMDs
+for cmd in "${CMDS[@]}"
+do
+  sudo lxc-attach -n $CONTAINER_NAME -- bash -c "$cmd"
+done
