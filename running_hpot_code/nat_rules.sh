@@ -8,7 +8,7 @@ fi
 
 myip=$(hostname -I | cut -d' ' -f1)
 
-if "$1" = "add"
+if [[ "$1" == "add" ]]
 then
   sudo ip addr add "$3"/16 brd + dev "$5"
   sudo iptables --table nat --insert PREROUTING --source 0.0.0.0/0 --destination "$3" --jump DNAT --to-destination "$2"

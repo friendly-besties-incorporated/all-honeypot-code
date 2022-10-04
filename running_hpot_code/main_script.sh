@@ -24,13 +24,14 @@ fi
 
 # Make the sandbox folder. Send mkdir -p path to the sandbox container
 sandbox="$S_IP"
-ssh logs@$sandbox "sudo mkdir -p $path_to_dl_store_sandbox"
+#ssh logs@$sandbox "sudo mkdir -p $path_to_dl_store_sandbox"
 # Not tested TODO
 
 # This is where we'd "leave it on" for the whole month comes from.
-while true
-do
+#while true
+#do
   # Create the container
+  echo "Creating container"
   sudo lxc-copy -n "$1" -N "$running_cont"
   sudo lxc-start -n "$running_cont"
 
@@ -39,6 +40,7 @@ do
   ip=$(sudo lxc-info -n "$running_cont" -iH)
 
   # Add NAT rules. For now, in a separate script
+  echo "Adding nat rules"
   /bin/bash ./nat_rules.sh "add" "$ip" "$2" "$3" "$4"
 
   # Probably start apache? Maybe start openssh?
@@ -46,8 +48,9 @@ do
   #
   # Run, and kill by broken pipe
   # Note: this requires a modified MITM
-  sudo node "$pathtomitm"/mitm.js -n "$running_cont" -i "$ip" -p "$3" --auto-access --auto-access-fixed 1 --debug | sed -n -e "/Container's OpenSSH server ended connection/q"
-
+  echo "Starting mitm"
+  sudo node "$pathtomitm"/mitm.js -n "$running_cont" -i "$ip" -p "$3" --auto-access --auto-access-fixed 1 --debug -e
+  echo "Ending mitm, deleting nat rules"
   # Delete NAT rules right away
   /bin/bash ./nat_rules.sh "delete" "$ip" "$2" "$3" "$4"
 
@@ -56,11 +59,13 @@ do
   log_name="$1""_""$end_time"
 
   # Process the complete container: move downloaded files, anything else
+  echo "Processing complete cotnainer"
   /bin/bash ./process_complete_container.sh "$1" "$running_cont" "$log_name"
 
   # Delete the container
-  sudo lxc-stop -n "$running_cont"
-  sudo lxc-destroy -n "$running_cont"
+  echo "Not! Stopping and destroying container"
+  #sudo lxc-stop -n "$running_cont"
+  #sudo lxc-destroy -n "$running_cont"
 
   sleep 5
-done
+#done
