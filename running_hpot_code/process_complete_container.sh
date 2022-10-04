@@ -27,16 +27,10 @@ sudo zip "$log_name" "$mitmfile" "$apachefile" -j
 sudo mv "$log_name".zip "$path_to_log_store_hpothost"
 echo "I theoretically moved the thing to $path_to_log_store_hpothost"
 
-
 # STEP TWO: DOWNLOADS INTO SANDBOX VM
 sandbox="$S_IP"
 dir="$C_P_DLDS"
 
-sudo lxc-attach -n $cname -- bash -c "sudo apt-get install zip"
-sudo lxc-attach -n $cname -- bash -c "zip -r $log_name.zip $dir"
-sudo scp -i ~/.ssh/id_rsa.pub $path_to_container/$log_name.zip logs@$sandbox:~/$path_to_dl_store_sandbox/$log_name.zip
-# TODO connect properly
-# requires the account executing to have ssh authentication with logs@sandbox
-# THE SSH PART IS NOT QUITE WORKING YET
-
-
+sudo zip -r "$log_name""_dl".zip "$path_to_container""$dir"
+sudo scp "$log_name""_dl".zip logs@$sandbox:$path_to_dl_store_sandbox/
+# This requires the account executing to have ssh authentication with logs@sandbox. This is setup already with the student account.
