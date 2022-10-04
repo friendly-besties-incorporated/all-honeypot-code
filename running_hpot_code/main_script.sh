@@ -28,8 +28,8 @@ sandbox="$S_IP"
 # Not tested TODO
 
 # This is where we'd "leave it on" for the whole month comes from.
-#while true
-#do
+while true
+do
   # Create the container
   echo "Creating container"
   sudo lxc-copy -n "$1" -N "$running_cont"
@@ -63,9 +63,9 @@ sandbox="$S_IP"
   /bin/bash ./process_complete_container.sh "$1" "$running_cont" "$log_name"
 
   # Delete the container
-  echo "Not! Stopping and destroying container"
-  #sudo lxc-stop -n "$running_cont"
-  #sudo lxc-destroy -n "$running_cont"
+  echo "Stopping and destroying container"
+  sudo lxc-stop -n "$running_cont"
+  sudo lxc-destroy -n "$running_cont"
 
   sleep 5
-#done
+done
