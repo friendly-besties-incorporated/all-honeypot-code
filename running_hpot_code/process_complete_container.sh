@@ -1,6 +1,6 @@
 if [ ! $# -eq 3 ]
 then
-  echo "Usage: ./process_complete_container [template name] [container name] [log name]"
+  echo "Usage: ./process_complete_container [template name] [container name] [log name (without .zip)]"
   exit 1
 fi
 
@@ -32,5 +32,5 @@ sandbox="$S_IP"
 dir="$C_P_DLDS"
 
 sudo zip -r "$log_name""_dl".zip "$path_to_container""$dir"
-sudo scp "$log_name""_dl".zip logs@$sandbox:$path_to_dl_store_sandbox/
+scp "$log_name""_dl".zip logs@$sandbox:$path_to_dl_store_sandbox/
 # This requires the account executing to have ssh authentication with logs@sandbox. This is setup already with the student account.
