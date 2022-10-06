@@ -45,15 +45,13 @@ function getRndInteger(min: number, max: number) {
         })
     }
 
-    userObjs.forEach(u => console.log(u.password))
-
     // --- Add fake data to database ---
     const sql = new Sequelize("postgres://postgres:postgres@localhost:5432/postgres");
     await sql.authenticate();
     console.log("Authenticated with DB");
 
     // Initialize table
-    const User = sql.define("User", {
+    const User = sql.define("user", {
         name: {
             type: DataTypes.STRING,
         },
@@ -81,8 +79,6 @@ function getRndInteger(min: number, max: number) {
         password: {
             type: DataTypes.STRING
         }
-
-
     })
 
     await User.sync();
