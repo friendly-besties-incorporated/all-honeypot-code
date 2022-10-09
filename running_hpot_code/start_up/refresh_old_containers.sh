@@ -21,4 +21,4 @@ do
 done
 
 # Create and start all the containers again
-/bin/bash /home/student/all-honeypot-code/running_hpot_code/start_all_honeypots.sh
+/bin/bash ../start_all_honeypots.sh
