@@ -25,7 +25,7 @@ sysctl -w net.bridge.bridge-nf-call-iptables=1
 # Mode 1: Allow all traffic to the Honeypots
 # Mode 2: Allow only the listed port (hp_tcp, hp_udp)
 # Mode 3: Block the Honeypots
-MODE=1
+MODE=2
 
 # NOTE: MITM should listen on the $CONTAINER_GATEWAY IP, other IPs will get blocked by this firewall
 
@@ -47,7 +47,7 @@ LOG=0
 
 ##
 # MODE=2: Ports to Open on the Honeypots
-hp_tcp='22'
+hp_tcp='22 80 443'
 hp_udp=''
 
 ##

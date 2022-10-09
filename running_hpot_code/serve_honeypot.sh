@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This script will be the main script. It will take in a) container name to duplicate and b) the IP to map it to c) the mitm port
+# This script will start and serve a specified honeypot. It will take in a) container name to duplicate and b) the IP to map it to c) the mitm port
 # Ideally, we would turn it on once and then leave it on for the whole month. 
 
 if [ ! $# -eq 4 ]
