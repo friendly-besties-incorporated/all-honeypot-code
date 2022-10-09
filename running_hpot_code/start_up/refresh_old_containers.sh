@@ -12,7 +12,7 @@ do
     template_name=${i%_running}
     log_name="$template_name""_""$end_time"
     running_cont="$i"
-    /bin/bash ./process_complete_container.sh "$template_name" "$running_cont" "$log_name"
+    /bin/bash ../process_complete_container.sh "$template_name" "$running_cont" "$log_name"
 done
 
 # Delete the old containers
