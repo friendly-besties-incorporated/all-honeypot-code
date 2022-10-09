@@ -36,7 +36,7 @@ else
   # make the necessary directory
   sudo mkdir -p "$tocont"/var/log/.downloads
   # Install wget
-  sudo lxc-attach -n "$1" -- bash -c "sudo apt-get install wget"
+  sudo lxc-attach -n "$1" -- bash -c "sudo apt-get install wget -y"
   # Change name and stick fakewget into the wget spot
   sudo mv "$tocont"/usr/bin/wget "$tocont"/usr/bin/wwget
   sudo cp ./poisoned_versions/fakewget "$tocont"/usr/bin/wget
@@ -52,7 +52,7 @@ else
   # make the necessary directory
   sudo mkdir -p "$tocont"/var/log/.downloads
   # Install wget
-  sudo lxc-attach -n "$1" -- bash -c "sudo apt-get install curl"
+  sudo lxc-attach -n "$1" -- bash -c "sudo apt-get install curl -y"
   # Change name and stick fakewget into the wget spot
   sudo mv "$tocont"/usr/bin/curl "$tocont"/usr/bin/ccurl
   sudo cp ./poisoned_versions/fakecurl "$tocont"/usr/bin/curl

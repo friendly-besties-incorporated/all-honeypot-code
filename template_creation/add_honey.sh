@@ -17,7 +17,13 @@ then
 fi
 
 CONTAINER_NAME=$1
-CONTAINER_DIRECTORY="/var/lib/lxc/$CONTAINER_NAME/rootfs"
+CONTAINER_DIRECTORY="/var/lib/lxc/$CONTAINER_NAME/rootfs/"
+
+if [ ! -d "$CONTAINER_DIRECTORY" ] 
+then
+  echo "Error: Cannot add honey becuase the container directory does not exist!"
+  exit 2
+fi
 
 HOST_FAKE_PATH=$2
 CONTAINER_PROJECT_PATH="/root/fake"

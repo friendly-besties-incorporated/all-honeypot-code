@@ -1,0 +1,29 @@
+H_P_MITM=""
+H_P_LOGSTORE="/var/experiment_logs"
+S_P_DLDSTORE="/home/logs/downloads"
+S_IP="10.2.0.2"
+C_P_DLDS="/var/log/.downloads"
+
+# Workstation Network Interfaces:
+#   enp4s1 (52:54:00:0a:d5:38): Shared External Network (the Internet)
+#   enp4s2 (52:54:00:ea:a3:13): Safe Private Network
+
+# Honeypot Host Network Interfaces:
+#   enp4s1 (52:54:00:db:64:7b): Shared External Network (the Internet)
+#   enp4s2 (52:54:00:9a:77:77): UMD Network
+#   enp4s3 (52:54:00:e8:0c:26): Safe Private Network
+#   enp4s4 (52:54:00:6c:71:12): Unsafe Private Network
+
+INFACE="enp4s2"
+
+IP_CONTROL="128.8.238.198"
+IP_DITINFO="128.8.238.30"
+IP_DIDPSWD="128.8.238.49"
+IP_IOTPAGE="128.8.238.179"
+IP_BLANK="128.8.238.106"
+
+CNAME_CONTROL="control_t"
+CNAME_DITINFO="it_t"
+CNAME_DIDPSWD="pwd_t"
+CNAME_IOTPAGE="swipe_t"
+CNAME_BLANK="blank_t"

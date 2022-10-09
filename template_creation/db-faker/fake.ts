@@ -79,6 +79,8 @@ function getRndInteger(min: number, max: number) {
         password: {
             type: DataTypes.STRING
         }
+    }, {
+        timestamps: false
     })
 
     await User.sync();
