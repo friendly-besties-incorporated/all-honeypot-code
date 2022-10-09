@@ -3,12 +3,18 @@ This folder contains files for the creation of the honeypot templates. None of t
 ## main_template_creation
 Main script for creating the template honeypot! Run with name of template and the website it should mount
 
+Names of templates: 
+* swipe_t
+* it_t
+* pass_t
+* blank_t
+
 ## Called within main_template_creation:
 ### setup_apache
 Setps up apache for the honypot. Web page gets added here.
 
 ### poison_downloads
-Poisons curl and wget. Curretnly empty.
+Poisons curl and wget.
 
 ### add_honey
 Adds the shared honey/system things.
