@@ -17,6 +17,7 @@
 /sbin/iptables -P FORWARD ACCEPT
 /sbin/iptables -P OUTPUT ACCEPT
 
+modprobe br_netfilter
 sysctl -w net.bridge.bridge-nf-call-iptables=1
 
 ##
