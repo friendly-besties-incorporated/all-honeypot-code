@@ -5,19 +5,22 @@
 # Process any data from the old containers
 for i in $(sudo lxc-ls | grep running)
 do
-    sudo lxc-start $i
+    sudo lxc-start "$i"
     sleep 5
-    log_name="$i""_""$end_time"
-    running_cont="$i_running"
-    /bin/bash ./process_complete_container.sh "$i" "$running_cont" "$log_name"
+    end_time=$( date "+%F-%T-%Z" )
+    # This captures everything but _running in the container name
+    template_name=${i%_running}
+    log_name="$template_name""_""$end_time"
+    running_cont="$i"
+    /bin/bash ./process_complete_container.sh "$template_name" "$running_cont" "$log_name"
 done
 
 # Delete the old containers
 for i in $(sudo lxc-ls | grep running)
 do
-    sudo lxc-stop $i
+    sudo lxc-stop "$i"
     sleep 2
-    sudo lxc-destroy $i
+    sudo lxc-destroy "$i"
 done
 
 # Create and start all the containers again
