@@ -6,8 +6,9 @@ Main script for creating the template honeypot! Run with name of template and th
 Names of templates: 
 * swipe_t
 * it_t
-* pass_t
+* pwd_t
 * blank_t
+* control_t
 
 ## Called within main_template_creation:
 ### setup_apache
