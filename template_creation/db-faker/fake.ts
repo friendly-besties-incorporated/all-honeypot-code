@@ -31,8 +31,8 @@ function getRndInteger(min: number, max: number) {
         let middleName = faker.name.middleName()
         let lastName = faker.name.lastName();
         let fullName = `${firstName} ${middleName} ${lastName}`
-        let userName = `${firstName[0].toLowerCase()}${middleName[0].toLowerCase()}${lastName.slice(0,5).toLowerCase()}`
-        let email = `${userName}@umd.edu`
+        let userName = `${firstName[0].toLowerCase()}${middleName[0].toLowerCase()}${lastName.slice(0,5).toLowerCase()}`.replace("'", "")
+        let email = `${userName}@faculty.umd.edu`
 
         userObjs.push({
             name: fullName,

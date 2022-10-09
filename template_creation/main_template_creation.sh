@@ -16,10 +16,10 @@ sudo lxc-create -n "$1" -t download -- -d ubuntu -r focal -a amd64
 sudo lxc-start -n "$1"
 
 # Install openssh and apache
-sudo lxc-attach -n "$1" -- bash -c "sudo apt-get install openssh-server"
+sudo lxc-attach -n "$1" -- bash -c "sudo apt-get install openssh-server -y"
 if [ -d "$2" ]
 then
-  sudo lxc-attach -n "$1" -- bash -c "sudo apt-get install apache2"
+  sudo lxc-attach -n "$1" -- bash -c "sudo apt-get install apache2 -y"
 
   # Set up apache!
   /bin/bash ./setup_apache.sh "$1" "$2"
@@ -27,7 +27,7 @@ fi
 
 # Add honey
 echo "Adding honey..."
-/bin/bash ./add_honey.sh "$1"
+/bin/bash ./add_honey.sh "$1" "./db-faker"
 
 # Poison wget and curl
 echo "Poisoning downloads..."
