@@ -21,7 +21,7 @@ mitmfile="$path_to_mitm""/logs/session_streams/""$mitmfile"
 # Find the apache log file TODO this could be incorrect
 apachefile="$path_to_container""/var/log/apache2/access.log"
 # Zip up the two files into an archive with the log_name
-sudo zip "$log_name" "$mitmfile" "$apachefile" -j
+sudo zip "$log_name".zip "$mitmfile" "$apachefile" -j
 
 # Move the zip file into the proper folder
 sudo mv "$log_name".zip "$path_to_log_store_hpothost"
