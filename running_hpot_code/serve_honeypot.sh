@@ -5,7 +5,7 @@
 
 if [ ! $# -eq 4 ]
 then
-  echo "Usage: ./main_script [template container name] [external IP] [MITM port] [interface]"
+  echo "Usage: ./serve_honeypot.sh [template container name] [external IP] [MITM port] [interface]"
   exit 1
 fi
 
