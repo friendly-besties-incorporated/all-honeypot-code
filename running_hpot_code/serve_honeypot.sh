@@ -75,7 +75,7 @@ do
   # Run, and kill by broken pipe
   # Note: this requires a modified MITM
   echo "Starting mitm"
-  sudo node "$pathtomitm"/mitm.js -n "$running_cont" -i "$ip" -p "$MITM_PORT" --auto-access --auto-access-fixed 1 --debug -e
+  sudo node "$pathtomitm"/mitm.js -n "$running_cont" -i "$ip" -l "10.0.3.1" -p "$MITM_PORT" --auto-access --auto-access-fixed 1 --debug -e
   echo "Ending mitm, deleting nat rules"
   # Delete NAT rules right away
   /bin/bash ./nat_rules.sh "delete" "$ip" "$EXTERNAL_IP" "$MITM_PORT" "$EXTERNAL_INTERFACE"

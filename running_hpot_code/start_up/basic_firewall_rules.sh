@@ -70,7 +70,6 @@ trusted_ip='172.30.0.0/16 10.255.0.0/16 192.168.11.0/24'
 /sbin/iptables -F OUTPUT
 /sbin/iptables -P OUTPUT ACCEPT
 
-
 ####################
 ## Host ##
 ####################
