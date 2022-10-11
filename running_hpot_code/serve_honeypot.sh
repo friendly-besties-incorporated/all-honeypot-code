@@ -26,7 +26,7 @@ path_to_dl_store_sandbox="$S_P_DLDSTORE""/""$TEMPLATE_CONTAINER_NAME"
 # Check if the folder for this template already exists
 if [ ! -d "$path_to_log_store_hpothost" ]
 then
-  sudo mkdir "$path_to_log_store_hpothost"
+  sudo mkdir -p "$path_to_log_store_hpothost"
 fi
 
 # Make the sandbox folder. Send mkdir -p path to the sandbox container
