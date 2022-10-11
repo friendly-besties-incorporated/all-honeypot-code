@@ -31,7 +31,8 @@ echo "I theoretically moved the thing to $path_to_log_store_hpothost"
 sandbox="$S_IP"
 dir="$C_P_DLDS"
 
-sudo zip -r "$log_name""_dl".zip "$path_to_container""$dir" -j
+# Extract this archive with  [ tar -xvf "$log_name""_dl".tar --strip-components 7 ]
+sudo tar -cf "$log_name""_dl".tar "$path_to_container""$dir"
 scp "$log_name""_dl".zip logs@$sandbox:$path_to_dl_store_sandbox/
 rm "$log_name""_dl".zip
 # This requires the account executing to have ssh authentication with logs@sandbox. This is setup already with the student account.
