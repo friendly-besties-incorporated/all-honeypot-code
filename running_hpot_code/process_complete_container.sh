@@ -33,4 +33,5 @@ dir="$C_P_DLDS"
 
 sudo zip -r "$log_name""_dl".zip "$path_to_container""$dir" -j
 scp "$log_name""_dl".zip logs@$sandbox:$path_to_dl_store_sandbox/
+rm "$log_name""_dl".zip
 # This requires the account executing to have ssh authentication with logs@sandbox. This is setup already with the student account.
