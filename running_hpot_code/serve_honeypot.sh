@@ -81,7 +81,7 @@ do
   /bin/bash ./nat_rules.sh "delete" "$ip" "$EXTERNAL_IP" "$MITM_PORT" "$EXTERNAL_INTERFACE"
 
   # All logs will have this same name
-  end_time=$( date "+%F-%T-%Z" )
+  end_time=$( date "+%F-%H-%M-%S" )
   log_name="$TEMPLATE_CONTAINER_NAME""_""$end_time"
 
   # Process the complete container: move downloaded files, anything else
