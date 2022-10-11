@@ -59,6 +59,10 @@ do
   # Create the container
   echo "Creating container"
   sudo lxc-copy -n "$TEMPLATE_CONTAINER_NAME" -N "$running_cont"
+
+  # Edit hostname
+  sudo /bin/bash -c "echo is-admin > /var/lib/lxc/$running_cont/rootfs/etc/hostname"
+  
   sudo lxc-start -n "$running_cont"
 
   sleep 5
