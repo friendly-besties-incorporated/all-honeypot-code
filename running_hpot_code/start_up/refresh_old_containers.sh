@@ -4,7 +4,7 @@
 
 cd ..
 # Process any data from the old containers
-for i in $(sudo lxc-ls -l | grep running)
+for i in $(sudo lxc-ls -1 | grep running)
 do
     sudo lxc-start "$i"
     sleep 5
@@ -17,7 +17,7 @@ do
 done
 
 # Delete the old containers
-for i in $(sudo lxc-ls -l | grep running)
+for i in $(sudo lxc-ls -1 | grep running)
 do
     sudo lxc-stop "$i"
     sleep 2
