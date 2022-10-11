@@ -24,10 +24,7 @@ path_to_log_store_hpothost="$H_P_LOGSTORE""/""$TEMPLATE_CONTAINER_NAME"
 path_to_dl_store_sandbox="$S_P_DLDSTORE""/""$TEMPLATE_CONTAINER_NAME"
 
 # Check if the folder for this template already exists
-if [ ! -d "$path_to_log_store_hpothost" ]
-then
-  sudo mkdir -p "$path_to_log_store_hpothost"
-fi
+sudo mkdir -p "$path_to_log_store_hpothost"
 
 # Make the sandbox folder. Send mkdir -p path to the sandbox container
 sandbox="$S_IP"
@@ -35,7 +32,7 @@ ssh logs@$sandbox "mkdir -p $path_to_dl_store_sandbox"
 # Not tested TODO
 
 # --- Serve honeypot ---
-serving=1
+serving=0
 
 # Create an interrupt function that will update the serve flag to stop looping.
 force_exit=0
