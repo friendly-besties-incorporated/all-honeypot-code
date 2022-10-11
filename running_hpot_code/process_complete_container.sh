@@ -31,7 +31,7 @@ echo "I theoretically moved the thing to $path_to_log_store_hpothost"
 sandbox="$S_IP"
 dir="$C_P_DLDS"
 
-# Extract this archive with  [ tar -xvf "$log_name""_dl".tar --strip-components 7 ]
+# Extract this archive with  [ tar -xvf "$log_name""_dl".tar --strip-components 7 --one-top-level]
 sudo tar -cf "$log_name""_dl".tar "$path_to_container""$dir"
 scp "$log_name""_dl".tar logs@$sandbox:$path_to_dl_store_sandbox/
 sudo rm "$log_name""_dl".tar
