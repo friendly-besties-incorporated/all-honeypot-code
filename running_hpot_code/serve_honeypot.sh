@@ -67,7 +67,12 @@ do
 
   sleep 5
 
-  ip=$(sudo lxc-info -n "$running_cont" -iH)
+  ip="-"
+  while [[ $ip == "-" ]]
+    do
+      ip=$(sudo lxc-ls -f -F name,IPV4 | grep -w "^$running_cont" | awk '{ print $2 }')
+      sleep 1
+  done
 
   # Add NAT rules. For now, in a separate script
   echo "Adding nat rules"
