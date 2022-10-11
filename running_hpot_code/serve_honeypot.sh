@@ -31,7 +31,7 @@ fi
 
 # Make the sandbox folder. Send mkdir -p path to the sandbox container
 sandbox="$S_IP"
-ssh logs@$sandbox "sudo mkdir -p $path_to_dl_store_sandbox"
+ssh logs@$sandbox "mkdir -p $path_to_dl_store_sandbox"
 # Not tested TODO
 
 # --- Serve honeypot ---
