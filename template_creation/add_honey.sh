@@ -29,7 +29,12 @@ HOST_FAKE_PATH=$2
 CONTAINER_PROJECT_PATH="/root/fake"
 
 # Copy project files to the container
-sudo cp -r $HOST_FAKE_PATH "$CONTAINER_DIRECTORY""$CONTAINER_PROJECT_PATH"
+DEPLOY_PATH="$CONTAINER_DIRECTORY""$CONTAINER_PROJECT_PATH"
+sudo mkdir $DEPLOY_PATH
+sudo cp -r $HOST_FAKE_PATH/package.json $DEPLOY_PATH
+sudo cp -r $HOST_FAKE_PATH/tsconfig.json $DEPLOY_PATH
+sudo cp -r $HOST_FAKE_PATH/fake-data.json $DEPLOY_PATH
+sudo cp -r $HOST_FAKE_PATH/load-data.ts $DEPLOY_PATH
 
 CMDS=()
 
@@ -42,14 +47,14 @@ CMDS+=("sudo apt install postgresql -y")
 
 # Install NodeJS (cmds from https://joshtronic.com/2021/05/09/how-to-install-nodejs-16-on-ubuntu-2004-lts/)
 CMDS+=("curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -")
-CMDS+=("apt install -y nodejs npm")
+CMDS+=("apt install -y nodejs")
 
 # Configure postgres with most secure password in the world
 CMDS+=("sudo -u postgres psql -c \"ALTER USER postgres WITH PASSWORD 'postgres';\"")
 
 CMDS+=("cd $CONTAINER_PROJECT_PATH; npm i; npm start");
 CMDS+=("echo Installed fake data!")
-CMDS+=("sudo apt remove nodejs npm -y")
+CMDS+=("sudo apt remove nodejs -y")
 
 # Execute CMDs
 for cmd in "${CMDS[@]}"
@@ -58,4 +63,4 @@ do
 done
 
 # Remove project files from container
-sudo rm -rf $CONTAINER_PROEJCT_PATH
+sudo rm -rf $DEPLOY_PATH

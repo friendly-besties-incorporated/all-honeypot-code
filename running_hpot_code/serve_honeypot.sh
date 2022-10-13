@@ -3,16 +3,23 @@
 # This script will start and serve a specified honeypot. It will take in a) container name to duplicate and b) the IP to map it to c) the mitm port
 # Ideally, we would turn it on once and then leave it on for the whole month. 
 
+echo "entering serve_honeypot"
+
 if [ ! $# -eq 4 ]
 then
   echo "Usage: ./serve_honeypot.sh [template container name] [external IP] [MITM port] [interface]"
   exit 1
 fi
 
+# Fetch honeypot environment variables
+source honeypot_environment
+
 TEMPLATE_CONTAINER_NAME=$1
 EXTERNAL_IP=$2
 MITM_PORT=$3
 EXTERNAL_INTERFACE=$4
+
+echo "actually in serve_honeypot"
 
 # --- Configure variables ---
 
@@ -23,66 +30,25 @@ pathtomitm="../MITM" # CHANGE TO WHERE MITM IS IF NOT HERE
 path_to_log_store_hpothost="$H_P_LOGSTORE""/""$TEMPLATE_CONTAINER_NAME"
 path_to_dl_store_sandbox="$S_P_DLDSTORE""/""$TEMPLATE_CONTAINER_NAME"
 
+echo "before mkdir"
+
 # Check if the folder for this template already exists
-sudo mkdir -p "$path_to_log_store_hpothost"
+#sudo mkdir -p "$path_to_log_store_hpothost"
+echo "Mkdir is manual for now. Please ensure the proper folder exists:" "$path_to_log_store_hpothost"
+
+echo "before sandnox"
 
 # Make the sandbox folder. Send mkdir -p path to the sandbox container
 sandbox="$S_IP"
-ssh logs@$sandbox "mkdir -p $path_to_dl_store_sandbox"
+#ssh logs@"$sandbox" "mkdir -p i ""$path_to_dl_store_sandbox"
+echo "temporarily disabled"
+
 # Not tested TODO
 
 # --- Serve honeypot ---
-serving=0
 
-# Create an interrupt function that will update the serve flag to stop looping.
-force_exit=0
-stop_serving() 
-{
-  if [ $force_exit -eq 0 ]
-  then
-    echo "Received inturrupt signal, stopping now (hit Ctrl+C again to force exit)."
-    serving=0
-    force_exit=1
-  else
-    echo "Forcing exit NOW!"
-    exit 
-  fi
-}
-
-trap stop_serving INT
-
-while [ $serving -eq 1 ]
-do
-  # Create the container
-  echo "Creating container"
-  sudo lxc-copy -n "$TEMPLATE_CONTAINER_NAME" -N "$running_cont"
-
-  # Edit hostname
-  sudo /bin/bash -c "echo is-admin > /var/lib/lxc/$running_cont/rootfs/etc/hostname"
-  
-  sudo lxc-start -n "$running_cont"
-
-  sleep 5
-
-  ip="-"
-  while [[ $ip == "-" ]]
-    do
-      ip=$(sudo lxc-ls -f -F name,IPV4 | grep -w "^$running_cont" | awk '{ print $2 }')
-      sleep 1
-  done
-
-  # Add NAT rules. For now, in a separate script
-  echo "Adding nat rules"
-  /bin/bash ./nat_rules.sh "add" "$ip" "$EXTERNAL_IP" "$MITM_PORT" "$EXTERNAL_INTERFACE"
-
-  # Probably start apache? Maybe start openssh?
-  # TODO Figure out if we need to start these services
-  #
-  # Run, and kill by broken pipe
-  # Note: this requires a modified MITM
-  echo "Starting mitm"
-  sudo node "$pathtomitm"/mitm.js -n "$running_cont" -i "$ip" -l "10.0.3.1" -p "$MITM_PORT" --auto-access --auto-access-fixed 1 --debug -e
-  echo "Ending mitm, deleting nat rules"
+function cleanup_honeypot()
+{ 
   # Delete NAT rules right away
   /bin/bash ./nat_rules.sh "delete" "$ip" "$EXTERNAL_IP" "$MITM_PORT" "$EXTERNAL_INTERFACE"
 
@@ -98,6 +64,61 @@ do
   echo "Stopping and destroying container"
   sudo lxc-stop -n "$running_cont"
   sudo lxc-destroy -n "$running_cont"
+}
+
+function safe_exit()
+{
+  # undo trap
+  trap - EXIT SIGTERM SIGINT
+
+  echo "Got EXIT signal, will safely exit now."
+  
+  # tell mitm.js to DIE
+  sudo kill $mitm_pid
+
+  cleanup_honeypot
+  
+  exit
+}
+
+trap safe_exit EXIT SIGTERM SIGINT
+
+echo "starting to serve"
+
+while true
+do
+  # Create the container
+  echo "Creating container"
+  sudo lxc-copy -n "$TEMPLATE_CONTAINER_NAME" -N "$running_cont"
+
+  # Start container
+  sudo lxc-start -n "$running_cont"
+
+  ip="-"
+  while [[ $ip == "-" ]]
+  do
+      ip=$(sudo lxc-ls -f -F name,IPV4 | grep -w "^$running_cont" | awk '{ print $2 }')
+      sleep 1
+  done
+
+  echo "before hostname"
+  # Edit hostname
+  sudo lxc-attach -n $running_cont -- bash -c "sudo hostname is-admin"
+  
+  echo "before nat rules"
+# Add NAT rules. For now, in a separate script
+  echo "Adding nat rules"
+  /bin/bash ./nat_rules.sh "add" "$ip" "$EXTERNAL_IP" "$MITM_PORT" "$EXTERNAL_INTERFACE"
+
+  # Run MITM`
+  echo "Starting mitm"
+  sudo node "$pathtomitm"/mitm.js -n "$running_cont" -i "$ip" -l "10.0.3.1" -p "$MITM_PORT" --auto-access --auto-access-fixed 1 --debug --logging-attacker-streams "$pathtomitm"/logs/session_streams/"$TEMPLATE_CONTAINER_NAME"  -e &
+  mitm_pid=$!
+  wait $mitm_pid
+
+  echo "Ending mitm, deleting nat rules"
+
+  cleanup_honeypot
 
   sleep 5
 done

@@ -4,6 +4,9 @@ then
   exit 1
 fi
 
+# Fetch honeypot environment variables
+source honeypot_environment
+
 cname="$2"
 tname="$1"
 path_to_mitm="../MITM"
@@ -16,8 +19,8 @@ log_name="$3"
 
 # STEP ONE: LOGS INTO HPOTHOST BACKUP
 # Find the most recent MITM file (possible data frace here)
-mitmfile=$( ls "$path_to_mitm"/logs/session_streams -t | head -1 )
-mitmfile="$path_to_mitm""/logs/session_streams/""$mitmfile"
+mitmfile=$( ls "$path_to_mitm"/logs/session_streams/"$tname" -t | head -1 )
+mitmfile="$path_to_mitm""/logs/session_streams/""$tname""/""$mitmfile"
 # Find the apache log file TODO this could be incorrect
 apachefile="$path_to_container""/var/log/apache2/access.log"
 # Zip up the two files into an archive with the log_name
