@@ -1,0 +1,17 @@
+[Unit]
+Description=FBI Honeypots Thing
+StartLimitBurst=1
+
+[Service]
+Type=forking
+RemainAfterExit=yes
+Restart=always
+RestartSec=5min
+User=student
+EnvironmentFile=/etc/environment
+ExecStart=/bin/bash refresh_old_containers.sh
+WorkingDirectory=/home/student/all-honeypot-code/running_hpot_code/start_up
+TimeoutSec=infinity
+
+[Install]
+WantedBy=multi-user.target
