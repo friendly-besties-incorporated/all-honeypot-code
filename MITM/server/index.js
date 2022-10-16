@@ -55,7 +55,7 @@ let loginAttempts, logins, delimiter = ';';
 commander.program
   .option('-d, --debug', 'Debug mode', false)
   .option('-e, --exit-after-session', false)
-  .option('-s, --session-time-limit', 'The amount of time before the attacker will be force disconnected (in seconds)', -1)
+  .option('-s, --session-time-limit <number>', 'The amount of time before the attacker will be force disconnected (in seconds)', -1)
   .requiredOption('-n, --container-name <name>', 'Container name')
   .requiredOption('-i, --container-ip <ip address>', 'Container internal IP address')
   .requiredOption('-p, --mitm-port <number>', 'MITM server listening port', parseInt)
@@ -674,18 +674,19 @@ function handleAttackerSession(attacker, lxc, sessionId, screenWriteStream, keys
 
       // Start session timeout countdown (if specified)
       let limit = parseInt(sessionTimeLimit)
+
       if (limit >= 0)
       {
         let sessionTimeoutMs = limit * 1000
         let timeoutDate = new Date(Date.now() + sessionTimeoutMs)
         debugLog("[TIMEOUT] Setting timeout for attacker, session will be timed out on " + timeoutDate.toLocaleString())
         sessionTimeoutId = setTimeout(() => {
-          debugLog("[TIMEOUT] Attacker ran out of time, shutting down now..." + timeoutDate.toLocaleString())
+          debugLog("[TIMEOUT] Attacker ran out of time, shutting down now...")
           attackerStream.end()
           lxcStream.end()
 
           sessionTimeoutId = undefined
-        })
+        }, sessionTimeoutMs)
       }
 
       debugLog('[SHELL] Opened shell for attacker');
