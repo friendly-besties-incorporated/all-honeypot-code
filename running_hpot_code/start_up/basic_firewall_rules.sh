@@ -48,7 +48,7 @@ LOG=0
 
 ##
 # MODE=2: Ports to Open on the Honeypots
-hp_tcp='22 80 443'
+hp_tcp='22 80'
 hp_udp=''
 
 ##

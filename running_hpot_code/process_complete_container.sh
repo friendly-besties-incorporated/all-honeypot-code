@@ -39,3 +39,5 @@ sudo tar -cf "$log_name""_dl".tar "$path_to_container""$dir"
 scp "$log_name""_dl".tar logs@$sandbox:$path_to_dl_store_sandbox/
 sudo rm "$log_name""_dl".tar
 # This requires the account executing to have ssh authentication with logs@sandbox. This is setup already with the student account.
+#
+echo "Done processing $cname" 

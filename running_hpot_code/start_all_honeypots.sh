@@ -50,8 +50,13 @@ trap safe_exit EXIT SIGTERM SIGINT
 
 /bin/bash ./serve_honeypot.sh "$CNAME_CONTROL" "$IP_CONTROL" "$PORT_CONTROL" "$INFACE" &
 /bin/bash ./serve_honeypot.sh "$CNAME_DITINFO" "$IP_DITINFO" "$PORT_DITINFO" "$INFACE" &
+/bin/bash ./serve_honeypot.sh "$CNAME_DITINFO2" "$IP_DITINFO2" "$PORT_DITINFO2" "$INFACE" &
 /bin/bash ./serve_honeypot.sh "$CNAME_DIDPSWD" "$IP_DIDPSWD" "$PORT_DIDPSWD" "$INFACE" &
+/bin/bash ./serve_honeypot.sh "$CNAME_DIDPSWD2" "$IP_DIDPSWD2" "$PORT_DIDPSWD2" "$INFACE" &
 /bin/bash ./serve_honeypot.sh "$CNAME_IOTPAGE" "$IP_IOTPAGE" "$PORT_IOTPAGE" "$INFACE" &
+/bin/bash ./serve_honeypot.sh "$CNAME_IOTPAGE2" "$IP_IOTPAGE2" "$PORT_IOTPAGE2" "$INFACE" &
 /bin/bash ./serve_honeypot.sh "$CNAME_BLANK" "$IP_BLANK" "$PORT_BLANK" "$INFACE" &
+/bin/bash ./serve_honeypot.sh "$CNAME_BLANK2" "$IP_BLANK2" "$PORT_BLANK2" "$INFACE" &
+/bin/bash ./cron_jobs/tcpdump_80.sh &
 
-wait_all_children
+#wait_all_children

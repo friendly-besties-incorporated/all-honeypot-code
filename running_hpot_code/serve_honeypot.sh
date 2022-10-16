@@ -5,9 +5,9 @@
 
 echo "entering serve_honeypot"
 
-if [ ! $# -eq 4 ]
+if [ ! $# -eq 5 ]
 then
-  echo "Usage: ./serve_honeypot.sh [template container name] [external IP] [MITM port] [interface]"
+  echo "Usage: ./serve_honeypot.sh [template container name] [external IP] [MITM port] [interface] [experiment num, 1 or 2]"
   exit 1
 fi
 
@@ -18,10 +18,22 @@ TEMPLATE_CONTAINER_NAME=$1
 EXTERNAL_IP=$2
 MITM_PORT=$3
 EXTERNAL_INTERFACE=$4
+EXP_NUM=$5
 
 echo "actually in serve_honeypot"
 
 # --- Configure variables ---
+
+true_template_name="$TEMPLATE_CONTAINER_NAME"
+
+if [[ $EXP_NUM == 2 ]]
+then
+  echo "Experiment number was two, 'changing' template container name"
+  TEMPLATE_CONTAINER_NAME="$TEMPLATE_CONTAINER_NAME""-2"
+  echo "It is now ""$TEMPLATE_CONTAINER_NAME"
+fi
+
+
 
 running_cont="$TEMPLATE_CONTAINER_NAME""_running"
 pathtomitm="../MITM" # CHANGE TO WHERE MITM IS IF NOT HERE
@@ -89,15 +101,17 @@ while true
 do
   # Create the container
   echo "Creating container"
-  sudo lxc-copy -n "$TEMPLATE_CONTAINER_NAME" -N "$running_cont"
+  sudo lxc-copy -n "$true_template_name" -N "$running_cont"
 
   # Start container
   sudo lxc-start -n "$running_cont"
 
-  ip="-"
-  while [[ $ip == "-" ]]
+  ip=""
+  while [[ $ip == "" ]]
   do
-      ip=$(sudo lxc-ls -f -F name,IPV4 | grep -w "^$running_cont" | awk '{ print $2 }')
+      #ip=$(sudo lxc-ls -f -F name,IPV4 | grep -w "^$running_cont" | awk '{ print $2 }')
+      ip=$(sudo lxc-info -n "$running_cont" -iH)
+      echo "Currently ip of $running_cont is" $ip
       sleep 1
   done
 
