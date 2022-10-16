@@ -55,6 +55,7 @@ let loginAttempts, logins, delimiter = ';';
 commander.program
   .option('-d, --debug', 'Debug mode', false)
   .option('-e, --exit-after-session', false)
+  .option('-s, --session-time-limit <number>', 'The amount of time before the attacker will be force disconnected (in seconds)', -1)
   .requiredOption('-n, --container-name <name>', 'Container name')
   .requiredOption('-i, --container-ip <ip address>', 'Container internal IP address')
   .requiredOption('-p, --mitm-port <number>', 'MITM server listening port', parseInt)
@@ -86,6 +87,7 @@ const {
   containerIp,
   mitmPort,
   mitmIp,
+  sessionTimeLimit,
   autoAccess,
   autoAccessNormalDistributionMean,
   autoAccessNormalDistributionStdDev,
@@ -587,7 +589,7 @@ function handleAttackerAuthCallback(err, lxc, authCtx, attacker) {
         // Log sign out event
 
         // exit if specified
-        if (options.exitAfterSession) {
+        if (exitAfterSession) {
           infoLog("Attacker closed connection and exit after session flag specified, exiting now...")
           exit();
         }
@@ -615,7 +617,7 @@ function handleAttackerAuthCallback(err, lxc, authCtx, attacker) {
 function handleAttackerSession(attacker, lxc, sessionId, screenWriteStream, keystrokesOutputStream) {
   let attackerStream, rows, cols, term;
   let lxcStream;
-
+  var sessionTimeoutId = undefined
 
   attacker.once('pty', function (accept, reject, info) {
     rows = info.rows;
@@ -653,6 +655,9 @@ function handleAttackerSession(attacker, lxc, sessionId, screenWriteStream, keys
       });
       lxcStream.on('close', function () {
         attackerStream.end();
+
+        if (sessionTimeout)
+          clearTimeout(sessionTimeout)
       });
     });
   });
@@ -666,6 +671,23 @@ function handleAttackerSession(attacker, lxc, sessionId, screenWriteStream, keys
     }, function (err, lxcStreamObj) {
       lxcStream = lxcStreamObj;
       lxcStream.isTTY = true;
+
+      // Start session timeout countdown (if specified)
+      let limit = parseInt(sessionTimeLimit)
+
+      if (limit >= 0)
+      {
+        let sessionTimeoutMs = limit * 1000
+        let timeoutDate = new Date(Date.now() + sessionTimeoutMs)
+        debugLog("[TIMEOUT] Setting timeout for attacker, session will be timed out on " + timeoutDate.toLocaleString())
+        sessionTimeoutId = setTimeout(() => {
+          debugLog("[TIMEOUT] Attacker ran out of time, shutting down now...")
+          attackerStream.end()
+          lxcStream.end()
+
+          sessionTimeoutId = undefined
+        }, sessionTimeoutMs)
+      }
 
       debugLog('[SHELL] Opened shell for attacker');
       attackerStream = accept();
@@ -723,6 +745,11 @@ function handleAttackerSession(attacker, lxc, sessionId, screenWriteStream, keys
         screenWriteStream.write('-------- Attacker Keystrokes ----------\n');
         screenWriteStream.write(keystrokeFullBuffer);
         lxcStream.end();
+
+        if (sessionTimeoutId) {
+          clearTimeout(sessionTimeoutId)
+          sessionTimeoutId = undefined
+        }
       });
 
       lxcStream.on('end', function () {
@@ -733,6 +760,11 @@ function handleAttackerSession(attacker, lxc, sessionId, screenWriteStream, keys
         }
         debugLog('[SHELL] Honeypot ended shell');
         attackerStream.end();
+
+        if (sessionTimeoutId) {
+          clearTimeout(sessionTimeoutId)
+          sessionTimeoutId = undefined
+        }
       });
 
       // Keep track of LXC Streams
