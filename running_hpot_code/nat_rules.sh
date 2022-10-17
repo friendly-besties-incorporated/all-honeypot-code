@@ -19,15 +19,15 @@ then
   sudo ip addr add "$3"/24 brd + dev "$5"
 
   # Route container <=> internet traffic
-  sudo iptables --table nat --insert PREROUTING --source 0.0.0.0/0 --destination "$3" --jump DNAT --to-destination "$2"
-  sudo iptables --table nat --insert POSTROUTING --source "$2" --destination 0.0.0.0/0 --jump SNAT --to-source "$3"
+  sudo iptables --table nat --insert PREROUTING --source 0.0.0.0/0 --destination "$3" --jump DNAT --to-destination "$2" -w
+  sudo iptables --table nat --insert POSTROUTING --source "$2" --destination 0.0.0.0/0 --jump SNAT --to-source "$3" -w
 
   # MITM redirection
   sudo sysctl -w net.ipv4.conf.all.route_localnet=1
-  sudo iptables --table nat --insert PREROUTING --source 0.0.0.0/0 --destination "$3" --protocol tcp --dport 22 --jump DNAT --to-destination "$MITM_IP":"$4"
+  sudo iptables --table nat --insert PREROUTING --source 0.0.0.0/0 --destination "$3" --protocol tcp --dport 22 --jump DNAT --to-destination "$MITM_IP":"$4" -w
  else
   sudo ip addr del "$3"/24 brd + dev "$5"
-  sudo iptables --table nat --delete PREROUTING --source 0.0.0.0/0 --destination "$3" --jump DNAT --to-destination "$2"
-  sudo iptables --table nat --delete POSTROUTING --source "$2" --destination 0.0.0.0/0 --jump SNAT --to-source "$3"
-  sudo iptables --table nat --delete PREROUTING --source 0.0.0.0/0 --destination "$3" --protocol tcp --dport 22 --jump DNAT --to-destination "$MITM_IP":"$4"
+  sudo iptables --table nat --delete PREROUTING --source 0.0.0.0/0 --destination "$3" --jump DNAT --to-destination "$2" -w
+  sudo iptables --table nat --delete POSTROUTING --source "$2" --destination 0.0.0.0/0 --jump SNAT --to-source "$3" -w
+  sudo iptables --table nat --delete PREROUTING --source 0.0.0.0/0 --destination "$3" --protocol tcp --dport 22 --jump DNAT --to-destination "$MITM_IP":"$4" -w
  fi
