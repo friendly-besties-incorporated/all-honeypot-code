@@ -656,8 +656,8 @@ function handleAttackerSession(attacker, lxc, sessionId, screenWriteStream, keys
       lxcStream.on('close', function () {
         attackerStream.end();
 
-        if (sessionTimeout)
-          clearTimeout(sessionTimeout)
+        if (sessionTimeoutId)
+          clearTimeout(sessionTimeoutId)
       });
     });
   });
