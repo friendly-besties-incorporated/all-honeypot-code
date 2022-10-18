@@ -492,6 +492,9 @@ function handleAttempt(attacker) {
 
 
 function handleAttackerAuthCallback(err, lxc, authCtx, attacker) {
+  // Start session timeout countdown (if specified)
+  let limit = parseInt(sessionTimeLimit)
+
   // If an error has occurred with authentication (e.g. Invalid credentials)
   if (err) {
     debugLog('[Auth] Attacker authentication error: ' + err);
@@ -526,6 +529,8 @@ function handleAttackerAuthCallback(err, lxc, authCtx, attacker) {
     // -------- Attacker Limit Number of Attempts per Connection END ---------------
   } else {
     attacker.once('ready', function () { // authenticated user
+      // Create session timeout id variable
+      var sessionTimeoutId = undefined
 
       // Remove previous event listener for when attacker closed the connection
       attacker.removeListener('end', attackerEndBeforeAuthenticated);
@@ -576,23 +581,45 @@ function handleAttackerAuthCallback(err, lxc, authCtx, attacker) {
       logins.write(attackTimestamp.format('YYYY-MM-DD HH:mm:ss.SSS') + delimiter + attacker.ipAddress + delimiter +
         sessionId + '\n');
 
+      let attackerExitHandler = () => {
+        lxc.end();
+        screenWriteGZIP.end(); // end attacker session screen output write stream
+
+        // clear timeout (if needed)
+        if (sessionTimeoutId) {
+          clearTimeout(sessionTimeoutId)
+        }
+
+        // exit if specified
+        if (exitAfterSession) {
+          infoLog("Session is complete, exiting now...")
+          exit();
+        } 
+      }
+      
+      // Start session timeout timer
+      if (limit >= 0)
+      {
+        let sessionTimeoutMs = limit * 1000
+        let timeoutDate = new Date(Date.now() + sessionTimeoutMs)
+        debugLog("[TIMEOUT] Setting timeout for attacker, session will be timed out on " + timeoutDate.toLocaleString())
+        sessionTimeoutId = setTimeout(() => {
+          debugLog("[TIMEOUT] Attacker ran out of time, shutting down now...")
+          sessionTimeoutId = undefined
+          attackerExitHandler()
+        }, sessionTimeoutMs)
+      }
+
       attacker.once('session', function (accept) {
         let session = accept();
         if (session) {
           handleAttackerSession(session, lxc, sessionId, screenWriteGZIP, keystrokesOutputStream);
         }
       });
+
       attacker.on('end', function () {
         debugLog('[Connection] Attacker closed connection');
-        lxc.end();
-        screenWriteGZIP.end(); // end attacker session screen output write stream
-        // Log sign out event
-
-        // exit if specified
-        if (exitAfterSession) {
-          infoLog("Attacker closed connection and exit after session flag specified, exiting now...")
-          exit();
-        }
+        attackerExitHandler();
       });
     });
     // Disconnect LXC client when attacker closes window
@@ -617,7 +644,6 @@ function handleAttackerAuthCallback(err, lxc, authCtx, attacker) {
 function handleAttackerSession(attacker, lxc, sessionId, screenWriteStream, keystrokesOutputStream) {
   let attackerStream, rows, cols, term;
   let lxcStream;
-  var sessionTimeoutId = undefined
 
   attacker.once('pty', function (accept, reject, info) {
     rows = info.rows;
@@ -655,9 +681,6 @@ function handleAttackerSession(attacker, lxc, sessionId, screenWriteStream, keys
       });
       lxcStream.on('close', function () {
         attackerStream.end();
-
-        if (sessionTimeout)
-          clearTimeout(sessionTimeout)
       });
     });
   });
@@ -671,23 +694,6 @@ function handleAttackerSession(attacker, lxc, sessionId, screenWriteStream, keys
     }, function (err, lxcStreamObj) {
       lxcStream = lxcStreamObj;
       lxcStream.isTTY = true;
-
-      // Start session timeout countdown (if specified)
-      let limit = parseInt(sessionTimeLimit)
-
-      if (limit >= 0)
-      {
-        let sessionTimeoutMs = limit * 1000
-        let timeoutDate = new Date(Date.now() + sessionTimeoutMs)
-        debugLog("[TIMEOUT] Setting timeout for attacker, session will be timed out on " + timeoutDate.toLocaleString())
-        sessionTimeoutId = setTimeout(() => {
-          debugLog("[TIMEOUT] Attacker ran out of time, shutting down now...")
-          attackerStream.end()
-          lxcStream.end()
-
-          sessionTimeoutId = undefined
-        }, sessionTimeoutMs)
-      }
 
       debugLog('[SHELL] Opened shell for attacker');
       attackerStream = accept();
@@ -745,11 +751,6 @@ function handleAttackerSession(attacker, lxc, sessionId, screenWriteStream, keys
         screenWriteStream.write('-------- Attacker Keystrokes ----------\n');
         screenWriteStream.write(keystrokeFullBuffer);
         lxcStream.end();
-
-        if (sessionTimeoutId) {
-          clearTimeout(sessionTimeoutId)
-          sessionTimeoutId = undefined
-        }
       });
 
       lxcStream.on('end', function () {
@@ -760,11 +761,6 @@ function handleAttackerSession(attacker, lxc, sessionId, screenWriteStream, keys
         }
         debugLog('[SHELL] Honeypot ended shell');
         attackerStream.end();
-
-        if (sessionTimeoutId) {
-          clearTimeout(sessionTimeoutId)
-          sessionTimeoutId = undefined
-        }
       });
 
       // Keep track of LXC Streams
