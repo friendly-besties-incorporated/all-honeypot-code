@@ -46,11 +46,13 @@ do
         # Only add a line if the access log is non-empty.
         if [ $(wc -l < access.log) -ge 1 ]
         then
-            apacheIP=$(grep GET access.log | sed 's/ - -//' | sed 's/\[//' | sed 's/\]//' | sed 's/\+0000//' | sed 's/403 7620//' | sed 's/\"-\"//' | cut -d' ' -f1)
-            apacheTime=$(grep GET access.log | sed 's/ - -//' | sed 's/\[//' | sed 's/\]//' | sed 's/\+0000//' | sed 's/403 7620//' | sed 's/\"-\"//' | cut -d' ' -f2)
-            apacheID=$(grep GET testfile | sed 's/ - -//' | sed 's/\[//' | sed 's/\]//' | sed 's/\+0000//' | sed 's/403 7620//' | sed 's/\"-\"//' | cut -d"\"" -f4)
-
-            echo "$apacheIP | $apacheTime | $apacheID" >> $apache_output
+            apacheIP=$(grep GET access.log | cut -d' ' -f1)
+            apacheTime=$(grep GET access.log | cut -d'[' -f2 | cut -d']' -f1)
+            apacheGET=$(grep GET access.log | cut -d'"' -f2)
+            apacheSMTH=$(grep GET access.log | cut -d'"' -f4)
+            apacheID=$(grep GET access.log | cut -d'"' -f6)
+            
+            echo "$apacheIP | $apacheTime | $apacheGET | $apacheSMTH | $apacheID" >> $apache_output
         fi
          
         rm access.log
