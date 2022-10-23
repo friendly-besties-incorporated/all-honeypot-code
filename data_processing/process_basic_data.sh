@@ -26,7 +26,7 @@ do
 
     # Each line has data for each attacker, delimited by a | character.
 
-    echo "$linenum | $container | $attackerIP | $startTime | $username | $password | $commandsNum" > all_data.txt
+    echo "$linenum | $container | $attackerIP | $startTime | $username | $password | $commandsNum" >> all_data.txt
 
     ((linenum++))
 
