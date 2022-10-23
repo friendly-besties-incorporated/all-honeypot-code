@@ -55,7 +55,7 @@ do
                 apacheID=$(echo $line | cut -d'"' -f6)
             done < access.log
             
-            echo "$apacheIP | $apacheTime | $apacheGET | $apacheSMTH | $apacheID" >> $apache_output
+            echo "$container | $apacheIP | $apacheTime | $apacheGET | $apacheSMTH | $apacheID" >> $apache_output
         fi
          
         rm access.log
