@@ -2,7 +2,7 @@
 
 if [ ! $# -eq 4 ]
 then
-    echo "Usage: ./process_basic_data.sh [directory] [MIMT output file] [apache output file] [processed files file]"
+    echo "Usage: ./process_basic_data.sh [directory] [MITM output file] [apache output file] [processed files file]"
     echo "NOTE: You must run this in a directory that does NOT have a gzip file (.gz)."
     exit 1
 fi
