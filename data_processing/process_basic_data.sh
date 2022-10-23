@@ -11,8 +11,6 @@ output_file=$2
 processed=$3
 
 # Each time you call this script it will save a file called batch-#.data which will contain all the basic data about an attacker to a single file, divided by line.
-linenum=0
-
 for zip in $(find $dir -name '*.zip')
 do
     if [ $(cat $processed | grep -c $zip) -eq 0 ]
@@ -38,10 +36,7 @@ do
         password=$(zcat $file | head -n 9 | grep "Attacker Password" | cut -d" " -f3)
 
         # Each line has data for each attacker, delimited by a | character.
-
-        echo "$linenum | $container | $attackerIP | $startTime | $username | $password | $commandsNum" >> $output_file
-
-        ((linenum++))
+        echo "$container | $attackerIP | $startTime | $username | $password | $commandsNum" >> $output_file
 
         rm access.log
         rm $file.gz
