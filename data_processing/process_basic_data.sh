@@ -29,7 +29,7 @@ do
         then
             commandsNum=1
         else
-            commandsNum=$(zcat $file | grep -c @$container1)
+            commandsNum=$(zcat $file | grep -c @$is-admin)
         fi
 
         username=$(zcat $file | head -n 9 | grep "Attacker Username" | cut -d" " -f3)
