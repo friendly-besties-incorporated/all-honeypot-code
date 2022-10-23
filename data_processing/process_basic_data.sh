@@ -46,11 +46,14 @@ do
         # Only add a line if the access log is non-empty.
         if [ $(wc -l < access.log) -ge 1 ]
         then
-            apacheIP=$(grep GET access.log | cut -d' ' -f1)
-            apacheTime=$(grep GET access.log | cut -d'[' -f2 | cut -d']' -f1)
-            apacheGET=$(grep GET access.log | cut -d'"' -f2)
-            apacheSMTH=$(grep GET access.log | cut -d'"' -f4)
-            apacheID=$(grep GET access.log | cut -d'"' -f6)
+            while read -r line
+            do
+                apacheIP=$(echo $line | cut -d' ' -f1)
+                apacheTime=$(echo $line | cut -d'[' -f2 | cut -d']' -f1)
+                apacheGET=$(echo $line | cut -d'"' -f2)
+                apacheSMTH=$(echo $line | cut -d'"' -f4)
+                apacheID=$(echo $line | cut -d'"' -f6)
+            done < access.log
             
             echo "$apacheIP | $apacheTime | $apacheGET | $apacheSMTH | $apacheID" >> $apache_output
         fi
