@@ -3,6 +3,7 @@
 if [ ! $# -eq 3 ]
 then
     echo "Usage: ./process_basic_data.sh [directory] [output filename] [processed files filename]"
+    echo "NOTE: You must run this in a directory that does NOT have a gzip file (.gz)."
     exit 1
 fi
 
