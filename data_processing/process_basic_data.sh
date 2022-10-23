@@ -12,7 +12,6 @@ output_file=$2
 apache_output=$3
 processed=$4
 
-# Each time you call this script it will save a file called batch-#.data which will contain all the basic data about an attacker to a single file, divided by line.
 for zip in $(find $dir -name '*.zip')
 do
     if [ $(cat $processed | grep -c $zip) -eq 0 ]
@@ -44,11 +43,15 @@ do
         #------------------------------------------------------------
         
         # APACHE ACCESS LOG DATA
-        apacheIP=$(grep GET access.log | sed 's/ - -//' | sed 's/\[//' | sed 's/\]//' | sed 's/\+0000//' | sed 's/403 7620//' | sed 's/\"-\"//' | cut -d' ' -f1)
-        apacheTime=$(grep GET access.log | sed 's/ - -//' | sed 's/\[//' | sed 's/\]//' | sed 's/\+0000//' | sed 's/403 7620//' | sed 's/\"-\"//' | cut -d' ' -f2)
-        apacheID=$(grep GET testfile | sed 's/ - -//' | sed 's/\[//' | sed 's/\]//' | sed 's/\+0000//' | sed 's/403 7620//' | sed 's/\"-\"//' | cut -d"\"" -f4)
-        
-        echo "$apacheIP | $apacheTime | $apacheID" >> $apache_output
+        # Only add a line if the access log is non-empty.
+        if [ $(wc -l access.log | cut -d' ' -f) -ge 1 ]
+        then
+            apacheIP=$(grep GET access.log | sed 's/ - -//' | sed 's/\[//' | sed 's/\]//' | sed 's/\+0000//' | sed 's/403 7620//' | sed 's/\"-\"//' | cut -d' ' -f1)
+            apacheTime=$(grep GET access.log | sed 's/ - -//' | sed 's/\[//' | sed 's/\]//' | sed 's/\+0000//' | sed 's/403 7620//' | sed 's/\"-\"//' | cut -d' ' -f2)
+            apacheID=$(grep GET testfile | sed 's/ - -//' | sed 's/\[//' | sed 's/\]//' | sed 's/\+0000//' | sed 's/403 7620//' | sed 's/\"-\"//' | cut -d"\"" -f4)
+
+            echo "$apacheIP | $apacheTime | $apacheID" >> $apache_output
+        fi
          
         rm access.log
         rm $file.gz
