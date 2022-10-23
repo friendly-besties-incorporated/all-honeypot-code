@@ -1,15 +1,16 @@
 #!/bin/bash
 
-if [ ! $# -eq 3 ]
+if [ ! $# -eq 4 ]
 then
-    echo "Usage: ./process_basic_data.sh [directory] [output filename] [processed files filename]"
+    echo "Usage: ./process_basic_data.sh [directory] [MIMT output file] [apache output file] [processed files file]"
     echo "NOTE: You must run this in a directory that does NOT have a gzip file (.gz)."
     exit 1
 fi
 
 dir=$1
 output_file=$2
-processed=$3
+apache_output=$3
+processed=$4
 
 # Each time you call this script it will save a file called batch-#.data which will contain all the basic data about an attacker to a single file, divided by line.
 for zip in $(find $dir -name '*.zip')
@@ -21,6 +22,7 @@ do
         unzip $zip
         file=$(ls . | grep .gz | awk -F\.gz '{print $1}')
 
+        # MITM SESSION LOG DATA
         container=$(zcat $file| head -n 1 | cut -d" " -f3)
         attackerIP=$(zcat $file| head -n 3 | tail -n 1 | cut -d" " -f3)
         startTime=$(zcat $file | head -n 4 | tail -n 1 | cut -d" " -f3,4)
@@ -38,9 +40,17 @@ do
 
         # Each line has data for each attacker, delimited by a | character.
         echo "$container | $attackerIP | $startTime | $username | $password | $commandsNum" >> $output_file
-
+        
+        #------------------------------------------------------------
+        
+        # APACHE ACCESS LOG DATA
+        apacheIP=$(grep GET access.log | sed 's/ - -//' | sed 's/\[//' | sed 's/\]//' | sed 's/\+0000//' | sed 's/403 7620//' | sed 's/\"-\"//' | cut -d' ' -f1)
+        apacheTime=$(grep GET access.log | sed 's/ - -//' | sed 's/\[//' | sed 's/\]//' | sed 's/\+0000//' | sed 's/403 7620//' | sed 's/\"-\"//' | cut -d' ' -f2)
+        apacheID=$(grep GET testfile | sed 's/ - -//' | sed 's/\[//' | sed 's/\]//' | sed 's/\+0000//' | sed 's/403 7620//' | sed 's/\"-\"//' | cut -d"\"" -f4)
+        
+        echo "$apacheIP | $apacheTime | $apacheID" >> $apache_output
+         
         rm access.log
         rm $file.gz
     fi
-
 done
