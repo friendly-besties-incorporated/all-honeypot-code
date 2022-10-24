@@ -65,7 +65,7 @@ do
 
             done < access.log
 
-            echo "$apacheIP | $apacheTime | $apacheGET | $apacheSMTH | $apacheID | $isGet " >> $apache_output
+            echo "$container | $apacheIP | $apacheTime | $apacheGET | $apacheSMTH | $apacheID | $isGet" >> $apache_output
         fi
 
         #------------------------------------------------------------
