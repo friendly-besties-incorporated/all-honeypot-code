@@ -126,7 +126,7 @@ do
 
   # Run MITM`
   echo "Starting mitm"
-  sudo node "$pathtomitm"/mitm.js -n "$running_cont" -i "$ip" -l "10.0.3.1" -p "$MITM_PORT" --auto-access --auto-access-fixed 1 --debug --logging-attacker-streams "$pathtomitm"/logs/session_streams/"$TEMPLATE_CONTAINER_NAME" -s 3600 -e &
+  sudo node "$pathtomitm"/mitm.js -n "$running_cont" -i "$ip" -l "10.0.3.1" -p "$MITM_PORT" --auto-access --auto-access-fixed 1 --debug --logging-attacker-streams "$pathtomitm"/logs/session_streams/"$TEMPLATE_CONTAINER_NAME" -s 3600 -e 900 &
   mitm_pid=$!
   wait $mitm_pid
 

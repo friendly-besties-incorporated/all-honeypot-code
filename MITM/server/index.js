@@ -54,7 +54,7 @@ let loginAttempts, logins, delimiter = ';';
 
 commander.program
   .option('-d, --debug', 'Debug mode', false)
-  .option('-e, --exit-after-session', false)
+  .option('-e, --exit-after-session <number>', -1)
   .option('-s, --session-time-limit <number>', 'The amount of time before the attacker will be force disconnected (in seconds)', -1)
   .requiredOption('-n, --container-name <name>', 'Container name')
   .requiredOption('-i, --container-ip <ip address>', 'Container internal IP address')
@@ -490,6 +490,8 @@ function handleAttempt(attacker) {
   debugLog('[Auto Access] Attacker: ' + ipAddress + ', Threshold: ' + previouslySeen.randomAllow + ', Attempts: ' + previouslySeen.attempts);
 }
 
+var totalAttackers = 0
+var readyToExit = false
 
 function handleAttackerAuthCallback(err, lxc, authCtx, attacker) {
   // Start session timeout countdown (if specified)
@@ -582,6 +584,7 @@ function handleAttackerAuthCallback(err, lxc, authCtx, attacker) {
         sessionId + '\n');
 
       let attackerExitHandler = () => {
+        totalAttackers--;
         lxc.end();
         screenWriteGZIP.end(); // end attacker session screen output write stream
 
@@ -591,9 +594,23 @@ function handleAttackerAuthCallback(err, lxc, authCtx, attacker) {
         }
 
         // exit if specified
-        if (exitAfterSession) {
-          infoLog("Session is complete, exiting now...")
-          exit();
+        if (readyToExit) {
+          infoLog("Attacker has logged out an exit delay has expired, exiting now...")
+          exit()  
+        } else if (exitAfterSession == 0) {
+          infoLog("Session is complete and exit delay is immediate, exiting now...")
+          exit()
+        } else if (exitAfterSession >= 0) {
+          infoLog("Session is complete, will exit MITM after " + exitAfterSession + " seconds.")
+          setInterval(() => {
+            if (totalAttackers == 0) {
+              infoLog("Exit delay done and no attackers are connected, exiting now...")
+              exit();
+            } else {
+              infoLog("Exit delay done but attackers are still in container, will exit after this connection.")
+              readyToExit = true
+            }
+          }, exitAfterSession * 1000)
         } 
       }
       
@@ -621,6 +638,8 @@ function handleAttackerAuthCallback(err, lxc, authCtx, attacker) {
         debugLog('[Connection] Attacker closed connection');
         attackerExitHandler();
       });
+
+      totalAttackers++
     });
     // Disconnect LXC client when attacker closes window
     authCtx.accept();
