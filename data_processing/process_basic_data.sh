@@ -1,34 +1,82 @@
 #!/bin/bash
 
-# Each time you call this script it will save a file called batch-#.data which will contain all the basic data about an attacker to a single file, divided by line.
-# This part determines what the new file name for the processed data will be called as to not overwrite existing files. 
-linenum=0
-filename="batch"
-i=1
-if [[ -e ../backup_mitm_logs/data/$filename-$i.data ]]
+if [ ! $# -eq 5 ]
 then
-  while [[ -e ../backup_mitm_logs/data/$filename-$i.data ]]
-  do
-    let i++
-  done
+    echo "Usage: ./process_basic_data.sh [directory] [MITM output file] [apache output file] [commands output file] [processed files file]"
+    echo "NOTE: You must run this in a directory that does NOT have a gzip file (.gz)."
+    exit 1
 fi
-filename="$filename-$i"
 
-# Looks at each .gz file in the session_streams folder of the MITM server and extracts basic data about an attacker to create a line of information.
-for file in ../MITM/logs/session_streams/*.gz
+dir=$1
+output_file=$2
+apache_output=$3
+cmds_output=$4
+processed=$5
+
+for zip in $(find $dir -name '*.zip')
 do
-  ((linenum++))
-  container=$(zcat $file| head -n 1 | cut -d" " -f3)
-  attackerIP=$(zcat $file| head -n 3 | tail -n 1 | cut -d" " -f3)
-  startTime=$(zcat $file | head -n 4 | tail -n 1 | cut -d" " -f3,4)
-  endTime=$(zcat $file| tail -n 1 | cut -d" " -f 1,2 | sed 's/.$//')
-  commandsNum=$(zcat $file | grep -c @$container1)
-  difference=$(( $(date -d "$endTime" "+%s" ) - $(date -d "$startTime" "+%s") ))
-  minutes=$((difference/60))
+    if [ $(cat $processed | grep -c $zip) -eq 0 ]
+    then
+        echo $zip >> $processed
 
-# Each line has data for each attacker, delimited by a | character.
-  echo "$linenum | $container | $attackerIP | $startTime | $endTime | $commandsNum | $minutes" >> ../backup_mitm_logs/data/$filename.data
+        unzip $zip
+        file=$(ls . | grep .gz | awk -F\.gz '{print $1}')
+
+        # MITM SESSION LOG DATA
+        container=$(zcat $file| head -n 1 | cut -d" " -f3)
+        attackerIP=$(zcat $file| head -n 3 | tail -n 1 | cut -d" " -f3)
+        startTime=$(zcat $file | head -n 4 | tail -n 1 | cut -d" " -f3,4)
+
+        noninteractive=$(zcat $file | grep -c "Noninteractive mode attacker command")
+        if [ $noninteractive -eq 1 ]
+        then
+            commandsNum=1
+            noninteractive="y"
+        else
+            commandsNum=$(zcat $file | grep -c @$is-admin)
+            noninteractive="n"
+        fi
+
+        username=$(zcat $file | head -n 9 | grep "Attacker Username" | cut -d" " -f3)
+        password=$(zcat $file | head -n 9 | grep "Attacker Password" | cut -d" " -f3)
+
+        # Each line has data for each attacker, delimited by a | character.
+        echo "$container | $attackerIP | $startTime | $username | $password | $commandsNum | $noninteractive" >> $output_file
+
+        #------------------------------------------------------------
+
+        # APACHE ACCESS LOG DATA
+        # Only add a line if the access log is non-empty.
+        if [ $(wc -l < access.log) -ge 1 ]
+        then
+            while read -r line
+            do
+                apacheIP=$(echo $line | cut -d' ' -f1)
+                apacheTime=$(echo $line | cut -d'[' -f2 | cut -d']' -f1 | cut -d' ' -f1)
+                apacheGET=$(echo $line | cut -d'"' -f2)
+                apacheSMTH=$(echo $line | cut -d'"' -f4)
+                apacheID=$(echo $line | cut -d'"' -f6)
+                if [[ $(echo "$apacheGET" | grep -c GET) -eq 1 ]]
+                then
+                    isGet="y"
+                else
+                    isGet="n"
+                fi
+
+            done < access.log
+
+            echo "$container | $apacheIP | $apacheTime | $apacheGET | $apacheSMTH | $apacheID | $isGet" >> $apache_output
+        fi
+
+        #------------------------------------------------------------
+
+        # COMMANDS DATA
+        while read -r cmd
+        do
+            echo "$container | $attackerIP | $startTime | $username | $password | $noninteractive | $cmd" >> $cmds_output
+        done < <(zcat $file | grep -w "Noninteractive\|line" | sed 's/.*: //' | tr "['||','&&',';']" "\n" | sed '/^$/d' | sed 's/^[ ]//')
+
+        rm access.log
+        rm $file.gz
+    fi
 done
-
-# A message indicating that the processing was finished as well as what file it was saved to.
-echo "File saved to all-honeypot-code/MITM/backup_mitm_logs/data/$filename.data"
