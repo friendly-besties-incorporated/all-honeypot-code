@@ -134,5 +134,11 @@ do
 
   cleanup_honeypot
 
-  sleep 5
+  # Wait extra delay to slow down recycling
+  MINWAIT=30
+  MAXWAIT=150
+  random_delay=$((MINWAIT+RANDOM % (MAXWAIT-MINWAIT)))
+  echo "Waiting $random_delay seconds before restarting..."
+  sleep $random_delay
+
 done
