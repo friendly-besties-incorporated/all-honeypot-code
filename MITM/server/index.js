@@ -48,14 +48,19 @@ let DEFAULT_KEYS = {
 // Logging files
 let loginAttempts, logins, delimiter = ';';
 
+// cached command exit code
+const CACHE_COMMAND_EXIT_CODE = 100
+
 /************************************************************************************
  * ---------------------- MITM Global Variables END Block ---------------------------
  ************************************************************************************/
 
 commander.program
   .option('-d, --debug', 'Debug mode', false)
-  .option('-e, --exit-after-session', false)
+  .option('-e, --exit-after-session <number>', -1)
   .option('-s, --session-time-limit <number>', 'The amount of time before the attacker will be force disconnected (in seconds)', -1)
+  .option('-cc, --command-cache-path <file path>', '')
+  .option('-al, --attacker-limit <number>', 1)
   .requiredOption('-n, --container-name <name>', 'Container name')
   .requiredOption('-i, --container-ip <ip address>', 'Container internal IP address')
   .requiredOption('-p, --mitm-port <number>', 'MITM server listening port', parseInt)
@@ -85,6 +90,7 @@ const {
   exitAfterSession,
   containerName,
   containerIp,
+  commandCachePath,
   mitmPort,
   mitmIp,
   sessionTimeLimit,
@@ -175,6 +181,17 @@ initialize.makeOutputFolder(loggingKeystrokes);
 
 loginAttempts   = fs.createWriteStream(path.resolve(loggingAuthenticationAttempts, containerName + '.log'), { flags: 'a' });
 logins          = fs.createWriteStream(path.resolve(loggingLogins, containerName + '.log'), { flags: 'a' });
+
+// load command cache
+var commandCache = new Map();
+if (commandCachePath) {
+  let commandCacheString = fs.readFileSync(commandCachePath, "utf-8")
+  let commandCacheObj = JSON.parse(commandCacheString);
+
+  Object.keys(commandCacheObj).forEach(k => {
+    commandCache.set(k, commandCacheObj[k])
+  })
+}
 
 startServer(hostKeys, mitmPort);
 
@@ -490,6 +507,9 @@ function handleAttempt(attacker) {
   debugLog('[Auto Access] Attacker: ' + ipAddress + ', Threshold: ' + previouslySeen.randomAllow + ', Attempts: ' + previouslySeen.attempts);
 }
 
+var totalAttackers = 0
+var readyToExit = false
+var exitWasDueToCachedCommand = false
 
 function handleAttackerAuthCallback(err, lxc, authCtx, attacker) {
   // Start session timeout countdown (if specified)
@@ -582,6 +602,7 @@ function handleAttackerAuthCallback(err, lxc, authCtx, attacker) {
         sessionId + '\n');
 
       let attackerExitHandler = () => {
+        totalAttackers--;
         lxc.end();
         screenWriteGZIP.end(); // end attacker session screen output write stream
 
@@ -590,11 +611,26 @@ function handleAttackerAuthCallback(err, lxc, authCtx, attacker) {
           clearTimeout(sessionTimeoutId)
         }
 
-        // exit if specified
-        if (exitAfterSession) {
-          infoLog("Session is complete, exiting now...")
-          exit();
-        } 
+        if (exitAfterSession >= 0) {
+          if (readyToExit) { // exit if specified
+            infoLog("Attacker has logged out an exit delay has expired, exiting now...")
+            exit()  
+          } else if (exitAfterSession == 0) {
+            infoLog("Session is complete and exit delay is immediate, exiting now (wasCachedCommand: " + exitWasDueToCachedCommand + ")...")
+            exit(exitWasDueToCachedCommand ? CACHE_COMMAND_EXIT_CODE : 0)
+          } else if (exitAfterSession >= 0) {
+            infoLog("Session is complete, will exit MITM after " + exitAfterSession + " seconds.")
+            setInterval(() => {
+              if (totalAttackers == 0) {
+                infoLog("Exit delay done and no attackers are connected, exiting now...")
+                exit();
+              } else {
+                infoLog("Exit delay done but attackers are still in container, will exit after this connection.")
+                readyToExit = true
+              }
+            }, exitAfterSession * 1000)
+          }
+        }
       }
       
       // Start session timeout timer
@@ -621,6 +657,8 @@ function handleAttackerAuthCallback(err, lxc, authCtx, attacker) {
         debugLog('[Connection] Attacker closed connection');
         attackerExitHandler();
       });
+
+      totalAttackers++
     });
     // Disconnect LXC client when attacker closes window
     authCtx.accept();
@@ -670,19 +708,33 @@ function handleAttackerSession(attacker, lxc, sessionId, screenWriteStream, keys
 
     screenWriteStream.write(execStatement);
 
-    lxc.exec(info.command, function (err, lxcStream) {
-      if (err) {
-        return errorLog('lxc exec error', err);
-      }
+    if (commandCache.has(info.command)) {
+      debugLog('[EXEC] Noninteractive mode attacker command is cached!')
+      let cachedData = commandCache.get(info.command);
+      screenWriteStream.write(cachedData);
+
+      // Accept attacker and give them the cached command result
       attackerStream = accept();
-      lxcStream.on('data', function (data) {
-        screenWriteStream.write(data); // log command results to disk
-        attackerStream.write(data);
+      attackerStream.write(cachedData);
+      attackerStream.end();
+
+      // Set boolean flag
+      exitWasDueToCachedCommand = true
+    } else {
+      lxc.exec(info.command, function (err, lxcStream) {
+        if (err) {
+          return errorLog('lxc exec error', err);
+        }
+        attackerStream = accept();
+        lxcStream.on('data', function (data) {
+          screenWriteStream.write(data); // log command results to disk
+          attackerStream.write(data);
+        });
+        lxcStream.on('close', function () {
+          attackerStream.end();
+        });
       });
-      lxcStream.on('close', function () {
-        attackerStream.end();
-      });
-    });
+    }
   });
 
   // Interactive mode

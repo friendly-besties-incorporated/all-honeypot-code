@@ -33,8 +33,6 @@ then
   echo "It is now ""$TEMPLATE_CONTAINER_NAME"
 fi
 
-
-
 running_cont="$TEMPLATE_CONTAINER_NAME""_running"
 pathtomitm="../MITM" # CHANGE TO WHERE MITM IS IF NOT HERE
 
@@ -124,11 +122,18 @@ do
   echo "Adding nat rules"
   /bin/bash ./nat_rules.sh "add" "$ip" "$EXTERNAL_IP" "$MITM_PORT" "$EXTERNAL_INTERFACE"
 
-  # Run MITM`
-  echo "Starting mitm"
-  sudo node "$pathtomitm"/mitm.js -n "$running_cont" -i "$ip" -l "10.0.3.1" -p "$MITM_PORT" --auto-access --auto-access-fixed 1 --debug --logging-attacker-streams "$pathtomitm"/logs/session_streams/"$TEMPLATE_CONTAINER_NAME" -s 3600 -e &
-  mitm_pid=$!
-  wait $mitm_pid
+  # a cached exit will have an exit code of 100
+  mitm_exit_code=100
+
+  while [ $mitm_exit_code -eq 100 ]
+  do
+    # Run MITM`
+    echo "Starting mitm"
+    sudo node "$pathtomitm"/mitm.js -n "$running_cont" -i "$ip" -l "10.0.3.1" -p "$MITM_PORT" --auto-access --auto-access-fixed 1 --debug --logging-attacker-streams "$pathtomitm"/logs/session_streams/"$TEMPLATE_CONTAINER_NAME" -s 3600 -e 0 -cc './command-cache.json' &
+    mitm_pid=$!
+    wait $mitm_pid
+    mitm_exit_code=$?
+  done
 
   echo "Ending mitm, deleting nat rules"
 

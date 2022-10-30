@@ -1,0 +1,5 @@
+{  
+    "uname -a": "Linux is-admin 5.4.0-126-generic #142-Ubuntu SMP Fri Aug 26 12:12:57 UTC 2022 x86_64 x86_64 x86_64 GNU/Linux\n",
+    "uname -s -v -n -r -m": "Linux is-admin 5.4.0-126-generic #142-Ubuntu SMP Fri Aug 26 12:12:57 UTC 2022 x86_64\n",
+    "uname -s -m": "Linux x86_64\n"
+}
