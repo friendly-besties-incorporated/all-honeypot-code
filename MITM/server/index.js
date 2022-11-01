@@ -706,14 +706,13 @@ function handleAttackerSession(attacker, lxc, sessionId, screenWriteStream, keys
 
   // Non-interactive mode
   attacker.on('exec', function (accept, reject, info) {
-    debugLog('[EXEC] Noninteractive mode attacker command: ' + info.command);
-    keystrokesOutputStream.write(`${moment().format('YYYY-MM-DD HH:mm:ss.SSS')} [Noninteractive Mode] ${info.command}\n`);
-
-    const execStatement = 'Noninteractive mode attacker command: ' + info.command + '\n--------- Output Below -------\n';
-
-    screenWriteStream.write(execStatement);
-
     if (totalAttackers <= attackerLimit) {
+      debugLog('[EXEC] Noninteractive mode attacker command: ' + info.command);
+      keystrokesOutputStream.write(`${moment().format('YYYY-MM-DD HH:mm:ss.SSS')} [Noninteractive Mode] ${info.command}\n`);
+      const execStatement = 'Noninteractive mode attacker command: ' + info.command + '\n--------- Output Below -------\n';
+
+      screenWriteStream.write(execStatement);
+
       if (commandCache.has(info.command)) {
         debugLog('[EXEC] Noninteractive mode attacker command is cached!')
         let cachedData = commandCache.get(info.command);
@@ -742,7 +741,7 @@ function handleAttackerSession(attacker, lxc, sessionId, screenWriteStream, keys
         });
       }
     } else {
-      debugLog('[EXEC] Will not execute attacker command since another attacker is present within the container.')
+      debugLog(`[EXEC] Will not execute attacker command (${info.command}) since another attacker is present within the container.`)
 
       // existing attacker, cannot process command
       reject();
