@@ -60,7 +60,7 @@ commander.program
   .option('-e, --exit-after-session <number>', -1)
   .option('-s, --session-time-limit <number>', 'The amount of time before the attacker will be force disconnected (in seconds)', -1)
   .option('-cc, --command-cache-path <file path>', '')
-  .option('-al, --attacker-limit <number>', 1)
+  .option('-al, --attacker-limit <number>', 999)
   .requiredOption('-n, --container-name <name>', 'Container name')
   .requiredOption('-i, --container-ip <ip address>', 'Container internal IP address')
   .requiredOption('-p, --mitm-port <number>', 'MITM server listening port', parseInt)
@@ -90,6 +90,7 @@ const {
   exitAfterSession,
   containerName,
   containerIp,
+  attackerLimit,
   commandCachePath,
   mitmPort,
   mitmIp,
@@ -616,8 +617,12 @@ function handleAttackerAuthCallback(err, lxc, authCtx, attacker) {
             infoLog("Attacker has logged out an exit delay has expired, exiting now...")
             exit()  
           } else if (exitAfterSession == 0) {
-            infoLog("Session is complete and exit delay is immediate, exiting now (wasCachedCommand: " + exitWasDueToCachedCommand + ")...")
-            exit(exitWasDueToCachedCommand ? CACHE_COMMAND_EXIT_CODE : 0)
+            if (totalAttackers == 0) {
+              infoLog("All attackers exited and exit delay is immediate, exiting now (wasCachedCommand: " + exitWasDueToCachedCommand + ")...")
+              exit(exitWasDueToCachedCommand ? CACHE_COMMAND_EXIT_CODE : 0)
+            } else {
+              infoLog(`Session is complete and exit delay is immediate, but ${totalAttackers} attacker(s) still connected, won't exit yet.`)
+            }
           } else if (exitAfterSession >= 0) {
             infoLog("Session is complete, will exit MITM after " + exitAfterSession + " seconds.")
             setInterval(() => {
@@ -708,42 +713,56 @@ function handleAttackerSession(attacker, lxc, sessionId, screenWriteStream, keys
 
     screenWriteStream.write(execStatement);
 
-    if (commandCache.has(info.command)) {
-      debugLog('[EXEC] Noninteractive mode attacker command is cached!')
-      let cachedData = commandCache.get(info.command);
-      screenWriteStream.write(cachedData);
-
-      // Accept attacker and give them the cached command result
-      attackerStream = accept();
-      attackerStream.write(cachedData);
-      attackerStream.end();
-
-      // Set boolean flag
-      exitWasDueToCachedCommand = true
-    } else {
-      lxc.exec(info.command, function (err, lxcStream) {
-        if (err) {
-          return errorLog('lxc exec error', err);
-        }
+    if (totalAttackers <= attackerLimit) {
+      if (commandCache.has(info.command)) {
+        debugLog('[EXEC] Noninteractive mode attacker command is cached!')
+        let cachedData = commandCache.get(info.command);
+        screenWriteStream.write(cachedData);
+  
+        // Accept attacker and give them the cached command result
         attackerStream = accept();
-        lxcStream.on('data', function (data) {
-          screenWriteStream.write(data); // log command results to disk
-          attackerStream.write(data);
+        attackerStream.write(cachedData);
+        attackerStream.end();
+  
+        // Set boolean flag
+        exitWasDueToCachedCommand = true
+      } else {
+        lxc.exec(info.command, function (err, lxcStream) {
+          if (err) {
+            return errorLog('lxc exec error', err);
+          }
+          attackerStream = accept();
+          lxcStream.on('data', function (data) {
+            screenWriteStream.write(data); // log command results to disk
+            attackerStream.write(data);
+          });
+          lxcStream.on('close', function () {
+            attackerStream.end();
+          });
         });
-        lxcStream.on('close', function () {
-          attackerStream.end();
-        });
-      });
+      }
+    } else {
+      debugLog('[EXEC] Will not execute attacker command since another attacker is present within the container.')
+
+      // existing attacker, cannot process command
+      reject();
     }
+    
   });
 
   // Interactive mode
-  attacker.on('shell', function (accept) {
+  attacker.on('shell', function (accept, reject) {
     lxc.shell({
       rows: rows || 24,
       cols: cols || 80,
       term: term || 'ansi'
     }, function (err, lxcStreamObj) {
+      if (totalAttackers > attackerLimit) {
+        debugLog('[SHELL] Will not accept attacker shell connection since another attacker is already connected')
+        reject()
+        return;
+      }
+
       lxcStream = lxcStreamObj;
       lxcStream.isTTY = true;
 
