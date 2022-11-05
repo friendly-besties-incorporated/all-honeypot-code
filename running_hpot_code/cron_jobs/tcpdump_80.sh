@@ -7,6 +7,8 @@ http_filter="tcp port 80"
 filename="tcpdump_%y_%m_%d_%H_%M_%S.pcap"
 
 control_path="$logpath""/""$CNAME_CONTROL"
+control2_path="$logpath""/""$CNAME_CONTROL2"
+control3_path="$logpath""/""$CNAME_CONTROL3"
 ditinfo_path="$logpath""/""$CNAME_DITINFO"
 ditinfo2_path="$logpath""/""$CNAME_DITINFO2"
 didpswd_path="$logpath""/""$CNAME_DIDPSWD"
@@ -20,6 +22,8 @@ sudo mkdir -p "$control_path" "$ditinfo_path" "$ditinfo2_path" "$didpswd_path" "
 
 # start captures
 sudo tcpdump -i "$interface" -G 86400 -U -w "$control_path""/$filename" "$http_filter and dst $IP_CONTROL" &
+sudo tcpdump -i "$interface" -G 86400 -U -w "$control2_path""/$filename" "$http_filter and dst $IP_CONTROL2" &
+sudo tcpdump -i "$interface" -G 86400 -U -w "$control3_path""/$filename" "$http_filter and dst $IP_CONTROL3" &
 sudo tcpdump -i "$interface" -G 86400 -U -w "$ditinfo_path""/$filename" "$http_filter and dst $IP_DITINFO" &
 sudo tcpdump -i "$interface" -G 86400 -U -w "$ditinfo2_path""/$filename" "$http_filter and dst $IP_DITINFO2" &
 sudo tcpdump -i "$interface" -G 86400 -U -w "$didpswd_path""/$filename" "$http_filter and dst $IP_DIDPSWD" &

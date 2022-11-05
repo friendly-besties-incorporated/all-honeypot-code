@@ -33,6 +33,12 @@ then
   echo "It is now ""$TEMPLATE_CONTAINER_NAME"
 fi
 
+if [[ $EXP_NUM == 3 ]]
+then
+  echo "Experiment number was two, 'changing' template container name"
+  TEMPLATE_CONTAINER_NAME="$TEMPLATE_CONTAINER_NAME""-3"
+  echo "It is now ""$TEMPLATE_CONTAINER_NAME"
+fi
 running_cont="$TEMPLATE_CONTAINER_NAME""_running"
 pathtomitm="../MITM" # CHANGE TO WHERE MITM IS IF NOT HERE
 
