@@ -60,6 +60,10 @@ do
         #------------------------------------------------------------
 
         # APACHE ACCESS LOG DATA
+        
+        # This is for the bug when there is no access.log in the zip file
+        touch access.log
+        
         # Only add a line if the access log is non-empty.
         if [ $(wc -l < access.log) -ge 1 ]
         then
