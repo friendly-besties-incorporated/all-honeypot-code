@@ -70,6 +70,10 @@ function cleanup_honeypot()
   echo "Processing complete cotnainer"
   /bin/bash ./process_complete_container.sh "$TEMPLATE_CONTAINER_NAME" "$running_cont" "$log_name"
 
+  # Undo any write-locked files
+  path_to_container="/var/lib/lxc/$cname/rootfs" 
+  sudo chattr -i -R $path_to_container
+
   # Delete the container
   echo "Stopping and destroying container"
   sudo lxc-stop -n "$running_cont"

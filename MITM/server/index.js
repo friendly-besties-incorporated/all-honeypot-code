@@ -2,8 +2,6 @@
  * ---------------------- Required Packages START Block -----------------------------
  ************************************************************************************/
 
-const { exit } = require('process');
-
 const path            = require('path'),
       fs              = require('fs'),
       zlib            = require('zlib'),
@@ -49,7 +47,7 @@ let DEFAULT_KEYS = {
 let loginAttempts, logins, delimiter = ';';
 
 // cached command exit code
-const CACHE_COMMAND_EXIT_CODE = 100
+const NOT_DIRTY_EXIT_CODE = 100
 
 /************************************************************************************
  * ---------------------- MITM Global Variables END Block ---------------------------
@@ -510,7 +508,7 @@ function handleAttempt(attacker) {
 
 var totalAttackers = 0
 var readyToExit = false
-var exitWasDueToCachedCommand = false
+var isSessionDirty = false
 
 function handleAttackerAuthCallback(err, lxc, authCtx, attacker) {
   // Start session timeout countdown (if specified)
@@ -602,10 +600,20 @@ function handleAttackerAuthCallback(err, lxc, authCtx, attacker) {
       logins.write(attackTimestamp.format('YYYY-MM-DD HH:mm:ss.SSS') + delimiter + attacker.ipAddress + delimiter +
         sessionId + '\n');
 
-      let attackerExitHandler = () => {
+      let attackerExitHandler = async () => {
         totalAttackers--;
+        let now = new moment()
+        let timestamp = now.format('YYYY-MM-DD HH:mm:ss.SSS')
+        
         lxc.end();
-        screenWriteGZIP.end(); // end attacker session screen output write stream
+        
+        // Wait for GZIP to finish writing.
+        screenWriteGZIP.write(`--- End of Session (${timestamp}) ---\n`)
+        await new Promise((resolve, reject) => screenWriteGZIP.end(resolve))
+        await new Promise((resolve, reject) => screenWriteGZIP.close(resolve))
+
+        // Wait for session stream to finish writing.
+        await new Promise((resolve, reject) => screenWriteOutputStream.close(resolve))
 
         // clear timeout (if needed)
         if (sessionTimeoutId) {
@@ -615,11 +623,11 @@ function handleAttackerAuthCallback(err, lxc, authCtx, attacker) {
         if (exitAfterSession >= 0) {
           if (readyToExit) { // exit if specified
             infoLog("Attacker has logged out an exit delay has expired, exiting now...")
-            exit()  
+            safeExit()  
           } else if (exitAfterSession == 0) {
             if (totalAttackers == 0) {
-              infoLog("All attackers exited and exit delay is immediate, exiting now (wasCachedCommand: " + exitWasDueToCachedCommand + ")...")
-              exit(exitWasDueToCachedCommand ? CACHE_COMMAND_EXIT_CODE : 0)
+              infoLog("All attackers exited and exit delay is immediate, exiting now (dirty: " + isSessionDirty + ")...")
+              safeExit()
             } else {
               infoLog(`Session is complete and exit delay is immediate, but ${totalAttackers} attacker(s) still connected, won't exit yet.`)
             }
@@ -628,7 +636,7 @@ function handleAttackerAuthCallback(err, lxc, authCtx, attacker) {
             setInterval(() => {
               if (totalAttackers == 0) {
                 infoLog("Exit delay done and no attackers are connected, exiting now...")
-                exit();
+                safeExit();
               } else {
                 infoLog("Exit delay done but attackers are still in container, will exit after this connection.")
                 readyToExit = true
@@ -722,10 +730,10 @@ function handleAttackerSession(attacker, lxc, sessionId, screenWriteStream, keys
         attackerStream = accept();
         attackerStream.write(cachedData);
         attackerStream.end();
-  
-        // Set boolean flag
-        exitWasDueToCachedCommand = true
       } else {
+        // Set boolean flag
+        isSessionDirty = true
+
         lxc.exec(info.command, function (err, lxcStream) {
           if (err) {
             return errorLog('lxc exec error', err);
@@ -778,6 +786,7 @@ function handleAttackerSession(attacker, lxc, sessionId, screenWriteStream, keys
         terminal: true
       });
 
+      isSessionDirty = true;
       let keystrokeFullBuffer = '';
 
       reader.on('line', function (line) {
@@ -819,8 +828,7 @@ function handleAttackerSession(attacker, lxc, sessionId, screenWriteStream, keys
 
         // Keystroke Writing
         screenWriteStream.write('-------- Attacker Keystrokes ----------\n');
-        screenWriteStream.write(keystrokeFullBuffer);
-        lxcStream.end();
+        screenWriteStream.write(keystrokeFullBuffer, () => lxcStream.end());
       });
 
       lxcStream.on('end', function () {
@@ -1067,6 +1075,10 @@ process.on('uncaughtException', function(err) {
   housekeeping('UncaughtException', err.message)
 });
 
+function safeExit() {
+  housekeeping("exit")
+}
+
 function housekeeping(type, details = null) {
   if (!cleanup) {
     infoLog(`GOT ${type}, shutting down server...`);
@@ -1083,6 +1095,6 @@ function housekeeping(type, details = null) {
     lxcStreams.forEach(function(lxcStream) {
       lxcStream.close();
     });
-    setTimeout(() => process.exit(), 3000);
+    setTimeout(() => process.exit(isSessionDirty ? 0 : NOT_DIRTY_EXIT_CODE), 3000);
   }
 }
