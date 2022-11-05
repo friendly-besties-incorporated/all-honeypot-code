@@ -2,6 +2,8 @@
  * ---------------------- Required Packages START Block -----------------------------
  ************************************************************************************/
 
+const { debuglog } = require('util');
+
 const path            = require('path'),
       fs              = require('fs'),
       zlib            = require('zlib'),
@@ -48,6 +50,9 @@ let loginAttempts, logins, delimiter = ';';
 
 // cached command exit code
 const NOT_DIRTY_EXIT_CODE = 100
+
+// dangerous credentials (attacker will be rejected if their username/password contain any of these characters)
+const DANGEROUS_AUTH_CHARS = [";","'","`"]
 
 /************************************************************************************
  * ---------------------- MITM Global Variables END Block ---------------------------
@@ -299,6 +304,15 @@ function handleAttackerAuth(attacker, cb) {
       loginAttempts.write(moment().format('YYYY-MM-DD HH:mm:ss.SSS') + delimiter + attacker.ipAddress + delimiter +
         ctx.method + delimiter + ctx.username + delimiter + ctx.password + '\n');
 
+
+      // Check dangerous credentials
+      let dangerous = DANGEROUS_AUTH_CHARS.some(c => ctx.username.includes(c) || ctx.password.includes(c))
+      if (dangerous) {
+        debugLog(`[Aut] Attacker attempted to use dangerous credentials '${ctx.username}:${ctx.password}', will not process auth`)
+        cb('Invalid credentials - Password Authentication Failure', undefined, ctx, attacker);
+        return;
+      }
+
       // ----------- Automatic Access START Block --------------
 
       // Handle Attempt if automatic access is enabled
@@ -329,6 +343,7 @@ function handleAttackerAuth(attacker, cb) {
         spawnSync('bash', [ path.join(__dirname, '../lxc/load_credentials.sh'), containerName, ctx.username, ctx.password.replace(/`/g, '') ]);
 
         debugLog('[Auto Access] Auto-access is now disabled for the remainder of this MITM server instance');
+        
       } else if (autoAccessEnabled && !autoAccessThresholdAchieved) {
         // Barrier has not yet been broken `
         cb('Not yet compromised', null, ctx, attacker);
