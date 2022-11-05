@@ -308,7 +308,7 @@ function handleAttackerAuth(attacker, cb) {
       // Check dangerous credentials
       let dangerous = DANGEROUS_AUTH_CHARS.some(c => ctx.username.includes(c) || ctx.password.includes(c))
       if (dangerous) {
-        debugLog(`[Aut] Attacker attempted to use dangerous credentials '${ctx.username}:${ctx.password}', will not process auth`)
+        debugLog(`[Auth] Attacker attempted to use dangerous credentials '${ctx.username}:${ctx.password}', will not process auth`)
         cb('Invalid credentials - Password Authentication Failure', undefined, ctx, attacker);
         return;
       }
