@@ -53,6 +53,7 @@ do
         # MITM OUTPUT
         # Each line has data for each attacker, delimited by a | character.
         echo "$container | $attackerIP | $startTime | $username | $password | $commandsNum | $noninteractive" >> $output_file
-
+        
+        sudo mv $file /var/experiment_logs/prev_cache
     fi
 done
