@@ -574,14 +574,10 @@ function handleAttackerAuthCallback(err, lxc, authCtx, attacker) {
       const sessionId = attackTimestamp.format('YYYY_MM_DD_HH_mm_ss_SSS');
 
       // make a session screen output stream
-      const screenWriteOutputStream = fs.createWriteStream(path.join(loggingAttackerStreams, `${sessionId}.log.gz`));
-      const keystrokesOutputStream = fs.createWriteStream(path.join(loggingKeystrokes, `${sessionId}.log`));
-
-      // Make a Gzip handler to automatically compress the file on the fly
-      const screenWriteGZIP = zlib.createGzip({
-        flush : zlib.constants.Z_FULL_FLUSH
-      });
-      screenWriteGZIP.pipe(screenWriteOutputStream);
+      
+      var screenWriteOutputStream = undefined
+      var keystrokesOutputStream = undefined
+      var screenWriteGZIP = undefined
 
       /*let year = dateTime.getFullYear(), month = ('0' + dateTime.getMonth()).slice(-2),
               date = ('0' + dateTime.getDate()).slice(-2), hour = ('0' + dateTime.getHours()).slice(-2),
@@ -596,32 +592,14 @@ function handleAttackerAuthCallback(err, lxc, authCtx, attacker) {
         credential = authCtx.key.data.toString('base64');
       }
 
-      const metadata = [
-        `Container Name: ${containerName}`,
-        `Container IP: ${containerIp}`,
-        `Attacker IP: ${attacker.ipAddress}`,
-        `Attack Timestamp: ${attackTimestamp.format(`YYYY-MM-DD HH:mm:ss.SSS`)}`,
-        `Attacker IP Address: ${attacker.ipAddress}`,
-        `Login Method: ${authCtx.method}`,
-        `Attacker Username: ${authCtx.username}`,
-        `Attacker Password: ${credential}`,
-        `Session ID: ${sessionId}`,
-        `-------- Attacker Stream Below ---------\n`,
-      ];
-
-      screenWriteGZIP.write(metadata.join('\n'));
-
       // Log to student file
       logins.write(attackTimestamp.format('YYYY-MM-DD HH:mm:ss.SSS') + delimiter + attacker.ipAddress + delimiter +
         sessionId + '\n');
 
       let attackerExitHandler = async () => {
-        totalAttackers--;
         let now = new moment()
         let timestamp = now.format('YYYY-MM-DD HH:mm:ss.SSS')
-        
-        lxc.end();
-        
+
         // Wait for GZIP to finish writing.
         screenWriteGZIP.write(`--- End of Session (${timestamp}) ---\n`)
         await new Promise((resolve, reject) => screenWriteGZIP.end(resolve))
@@ -630,63 +608,106 @@ function handleAttackerAuthCallback(err, lxc, authCtx, attacker) {
         // Wait for session stream to finish writing.
         await new Promise((resolve, reject) => screenWriteOutputStream.close(resolve))
 
-        // clear timeout (if needed)
-        if (sessionTimeoutId) {
-          clearTimeout(sessionTimeoutId)
-        }
+        if (!attacker.wasRejected) {
+          totalAttackers--;
+          lxc.end();          
 
-        if (exitAfterSession >= 0) {
-          if (readyToExit) { // exit if specified
-            infoLog("Attacker has logged out an exit delay has expired, exiting now...")
-            safeExit()  
-          } else if (exitAfterSession == 0) {
-            if (totalAttackers == 0) {
-              infoLog("All attackers exited and exit delay is immediate, exiting now (dirty: " + isSessionDirty + ")...")
-              safeExit()
-            } else {
-              infoLog(`Session is complete and exit delay is immediate, but ${totalAttackers} attacker(s) still connected, won't exit yet.`)
-            }
-          } else if (exitAfterSession >= 0) {
-            infoLog("Session is complete, will exit MITM after " + exitAfterSession + " seconds.")
-            setInterval(() => {
+          // clear timeout (if needed)
+          if (sessionTimeoutId) {
+            clearTimeout(sessionTimeoutId)
+          }
+
+          if (exitAfterSession >= 0) {
+            if (readyToExit) { // exit if specified
+              infoLog("Attacker has logged out an exit delay has expired, exiting now...")
+              safeExit()  
+            } else if (exitAfterSession == 0) {
               if (totalAttackers == 0) {
-                infoLog("Exit delay done and no attackers are connected, exiting now...")
-                safeExit();
+                infoLog("All attackers exited and exit delay is immediate, exiting now (dirty: " + isSessionDirty + ")...")
+                safeExit()
               } else {
-                infoLog("Exit delay done but attackers are still in container, will exit after this connection.")
-                readyToExit = true
+                infoLog(`Session is complete and exit delay is immediate, but ${totalAttackers} attacker(s) still connected, won't exit yet.`)
               }
-            }, exitAfterSession * 1000)
+            } else if (exitAfterSession >= 0) {
+              infoLog("Session is complete, will exit MITM after " + exitAfterSession + " seconds.")
+              setInterval(() => {
+                if (totalAttackers == 0) {
+                  infoLog("Exit delay done and no attackers are connected, exiting now...")
+                  safeExit();
+                } else {
+                  infoLog("Exit delay done but attackers are still in container, will exit after this connection.")
+                  readyToExit = true
+                }
+              }, exitAfterSession * 1000)
+            }
           }
         }
       }
-      
-      // Start session timeout timer
-      if (limit >= 0)
-      {
-        let sessionTimeoutMs = limit * 1000
-        let timeoutDate = new Date(Date.now() + sessionTimeoutMs)
-        debugLog("[TIMEOUT] Setting timeout for attacker, session will be timed out on " + timeoutDate.toLocaleString())
-        sessionTimeoutId = setTimeout(() => {
-          debugLog("[TIMEOUT] Attacker ran out of time, shutting down now...")
-          sessionTimeoutId = undefined
-          attackerExitHandler()
-        }, sessionTimeoutMs)
-      }
 
-      attacker.once('session', function (accept) {
-        let session = accept();
-        if (session) {
-          handleAttackerSession(session, lxc, sessionId, screenWriteGZIP, keystrokesOutputStream);
+      attacker.once('session', function (accept, reject) {
+        let accepted = totalAttackers < attackerLimit
+
+        // Create session logs
+        screenWriteOutputStream = fs.createWriteStream(path.join(loggingAttackerStreams, `${accepted ? '' : 'REJECTED-'}${sessionId}.log.gz`));
+
+        // Make a Gzip handler to automatically compress the file on the fly
+        screenWriteGZIP = zlib.createGzip({
+          flush : zlib.constants.Z_FULL_FLUSH
+        });
+        screenWriteGZIP.pipe(screenWriteOutputStream);
+
+        const metadata = [
+          `Container Name: ${containerName}`,
+          `Container IP: ${containerIp}`,
+          `Attacker IP: ${attacker.ipAddress}`,
+          `Attack Timestamp: ${attackTimestamp.format(`YYYY-MM-DD HH:mm:ss.SSS`)}`,
+          `Attacker IP Address: ${attacker.ipAddress}`,
+          `Login Method: ${authCtx.method}`,
+          `Attacker Username: ${authCtx.username}`,
+          `Attacker Password: ${credential}`,
+          `Session ID: ${sessionId}`,
+          `Accepted: ${accepted}`,
+          `-------- Attacker Stream Below ---------\n`,
+        ];
+
+        screenWriteGZIP.write(metadata.join('\n'));
+
+        if (accepted) {
+          totalAttackers++;
+
+          let session = accept();
+          if (session) {
+            // Start session timeout timer
+            if (limit >= 0)
+            {
+              let sessionTimeoutMs = limit * 1000
+              let timeoutDate = new Date(Date.now() + sessionTimeoutMs)
+              debugLog("[TIMEOUT] Setting timeout for attacker, session will be timed out on " + timeoutDate.toLocaleString())
+              sessionTimeoutId = setTimeout(() => {
+                debugLog("[TIMEOUT] Attacker ran out of time, shutting down now...")
+                sessionTimeoutId = undefined
+                attackerExitHandler()
+              }, sessionTimeoutMs)
+            }
+
+            // Create keystroke stream
+            keystrokesOutputStream = fs.createWriteStream(path.join(loggingKeystrokes, `${sessionId}.log`));
+
+            attacker.wasRejected = false
+            handleAttackerSession(session, lxc, sessionId, screenWriteGZIP, keystrokesOutputStream);
+          }
+        } else {
+          debugLog(`[Connection] There are too many attackers connected (${attackerLimit}), so cannot accept this new attacker.`)
+          reject()
+          attacker.wasRejected = true
         }
       });
 
       attacker.on('end', function () {
+        console.log('Was rejected: ' + attacker.wasRejected)
         debugLog('[Connection] Attacker closed connection');
         attackerExitHandler();
       });
-
-      totalAttackers++
     });
     // Disconnect LXC client when attacker closes window
     authCtx.accept();
@@ -729,62 +750,48 @@ function handleAttackerSession(attacker, lxc, sessionId, screenWriteStream, keys
 
   // Non-interactive mode
   attacker.on('exec', function (accept, reject, info) {
-    if (totalAttackers <= attackerLimit) {
-      debugLog('[EXEC] Noninteractive mode attacker command: ' + info.command);
-      keystrokesOutputStream.write(`${moment().format('YYYY-MM-DD HH:mm:ss.SSS')} [Noninteractive Mode] ${info.command}\n`);
-      const execStatement = 'Noninteractive mode attacker command: ' + info.command + '\n--------- Output Below -------\n';
+    debugLog('[EXEC] Noninteractive mode attacker command: ' + info.command);
+    keystrokesOutputStream.write(`${moment().format('YYYY-MM-DD HH:mm:ss.SSS')} [Noninteractive Mode] ${info.command}\n`);
+    const execStatement = 'Noninteractive mode attacker command: ' + info.command + '\n--------- Output Below -------\n';
 
-      screenWriteStream.write(execStatement);
+    screenWriteStream.write(execStatement);
 
-      if (commandCache.has(info.command)) {
-        debugLog('[EXEC] Noninteractive mode attacker command is cached!')
-        let cachedData = commandCache.get(info.command);
-        screenWriteStream.write(cachedData);
-  
-        // Accept attacker and give them the cached command result
-        attackerStream = accept();
-        attackerStream.write(cachedData);
-        attackerStream.end();
-      } else {
-        // Set boolean flag
-        isSessionDirty = true
+    if (commandCache.has(info.command)) {
+      debugLog('[EXEC] Noninteractive mode attacker command is cached!')
+      let cachedData = commandCache.get(info.command);
+      screenWriteStream.write(cachedData);
 
-        lxc.exec(info.command, function (err, lxcStream) {
-          if (err) {
-            return errorLog('lxc exec error', err);
-          }
-          attackerStream = accept();
-          lxcStream.on('data', function (data) {
-            screenWriteStream.write(data); // log command results to disk
-            attackerStream.write(data);
-          });
-          lxcStream.on('close', function () {
-            attackerStream.end();
-          });
-        });
-      }
+      // Accept attacker and give them the cached command result
+      attackerStream = accept();
+      attackerStream.write(cachedData);
+      attackerStream.end();
     } else {
-      debugLog(`[EXEC] Will not execute attacker command (${info.command}) since another attacker is present within the container.`)
+      // Set boolean flag
+      isSessionDirty = true
 
-      // existing attacker, cannot process command
-      reject();
+      lxc.exec(info.command, function (err, lxcStream) {
+        if (err) {
+          return errorLog('lxc exec error', err);
+        }
+        attackerStream = accept();
+        lxcStream.on('data', function (data) {
+          screenWriteStream.write(data); // log command results to disk
+          attackerStream.write(data);
+        });
+        lxcStream.on('close', function () {
+          attackerStream.end();
+        });
+      });
     }
-    
   });
 
   // Interactive mode
-  attacker.on('shell', function (accept, reject) {
+  attacker.on('shell', function (accept) {
     lxc.shell({
       rows: rows || 24,
       cols: cols || 80,
       term: term || 'ansi'
     }, function (err, lxcStreamObj) {
-      if (totalAttackers > attackerLimit) {
-        debugLog('[SHELL] Will not accept attacker shell connection since another attacker is already connected')
-        reject()
-        return;
-      }
-
       lxcStream = lxcStreamObj;
       lxcStream.isTTY = true;
 

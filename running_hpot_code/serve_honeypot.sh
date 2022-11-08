@@ -128,7 +128,7 @@ do
   sudo lxc-attach -n $running_cont -- bash -c "sudo hostname is-admin"
   
   echo "before nat rules"
-# Add NAT rules. For now, in a separate script
+  # Add NAT rules. For now, in a separate script
   echo "Adding nat rules"
   /bin/bash ./nat_rules.sh "add" "$ip" "$EXTERNAL_IP" "$MITM_PORT" "$EXTERNAL_INTERFACE"
 
