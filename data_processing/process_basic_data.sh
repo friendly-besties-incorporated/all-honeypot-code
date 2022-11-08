@@ -80,10 +80,10 @@ do
                 else
                     isGet="n"
                 fi
+                
+                echo "$container | $apacheIP | $apacheTime | $apacheGET | $apacheSMTH | $apacheID | $isGet" >> $apache_output
 
-            done < access.log
-
-            echo "$container | $apacheIP | $apacheTime | $apacheGET | $apacheSMTH | $apacheID | $isGet" >> $apache_output
+            done < access.log          
         fi
         
         #------------------------------------------------------------
