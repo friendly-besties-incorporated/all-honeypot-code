@@ -17,79 +17,81 @@ for zip in $(find $dir -name '*.zip')
 do
     if [ $(cat $processed | grep -c $zip) -eq 0 ]
     then
-        echo $zip >> $processed
-
-        unzip $zip
-        file=$(ls . | grep .gz | awk -F\.gz '{print $1}')
-
-        #------------------------------------------------------------
-        
-        # MITM SESSION LOG DATA
-        container=$(zcat $file| head -n 1 | cut -d" " -f3)
-        attackerIP=$(zcat $file| head -n 3 | tail -n 1 | cut -d" " -f3)
-        startTime=$(zcat $file | head -n 4 | tail -n 1 | cut -d" " -f3,4)
-        
-        noninteractive=$(zcat $file | grep -c "Noninteractive mode attacker command")
-        if [ $noninteractive -eq 1 ]
+        if [ $(echo $zip | grep -c REJECTED) -eq 0 ]
         then
-            noninteractive="y"
-        else
-            noninteractive="n"
-        fi
+            echo $zip >> $processed
 
-        username=$(zcat $file | head -n 9 | grep "Attacker Username" | cut -d" " -f3)
-        password=$(zcat $file | head -n 9 | grep "Attacker Password" | cut -d" " -f3)
-        
-        #------------------------------------------------------------
-        
-        # COMMANDS DATA
-        commandsNum=0
-        
-        while read -r cmd
-        do
-            ((commandsNum++))
-            echo "$container | $attackerIP | $startTime | $username | $password | $noninteractive | $cmd" >> $cmds_output
-        done < <(zcat $file | grep -w "Noninteractive\|line" | sed 's/.*: //' | tr "['||','&&',';']" "\n" | sed '/^$/d' | sed 's/^[ ]//')
+            unzip $zip
+            file=$(ls . | grep .gz | awk -F\.gz '{print $1}')
 
-        #------------------------------------------------------------
-           
-        # MITM Output
-        # Each line has data for each attacker, delimited by a | character.
-        echo "$container | $attackerIP | $startTime | $username | $password | $commandsNum | $noninteractive" >> $output_file
+            #------------------------------------------------------------
 
-        #------------------------------------------------------------
+            # MITM SESSION LOG DATA
+            container=$(zcat $file| head -n 1 | cut -d" " -f3)
+            attackerIP=$(zcat $file| head -n 3 | tail -n 1 | cut -d" " -f3)
+            startTime=$(zcat $file | head -n 4 | tail -n 1 | cut -d" " -f3,4)
 
-        # APACHE ACCESS LOG DATA
-        
-        # This is for the bug when there is no access.log in the zip file
-        touch access.log
-        
-        # Only add a line if the access log is non-empty.
-        if [ $(wc -l < access.log) -ge 1 ]
-        then
-            while read -r line
+            noninteractive=$(zcat $file | grep -c "Noninteractive mode attacker command")
+            if [ $noninteractive -eq 1 ]
+            then
+                noninteractive="y"
+            else
+                noninteractive="n"
+            fi
+
+            username=$(zcat $file | head -n 9 | grep "Attacker Username" | cut -d" " -f3)
+            password=$(zcat $file | head -n 9 | grep "Attacker Password" | cut -d" " -f3)
+
+            #------------------------------------------------------------
+
+            # COMMANDS DATA
+            commandsNum=0
+
+            while read -r cmd
             do
-                apacheIP=$(echo $line | cut -d' ' -f1)
-                apacheTime=$(echo $line | cut -d'[' -f2 | cut -d']' -f1 | cut -d' ' -f1)
-                apacheGET=$(echo $line | cut -d'"' -f2)
-                apacheSMTH=$(echo $line | cut -d'"' -f4)
-                apacheID=$(echo $line | cut -d'"' -f6)
-                if [[ $(echo "$apacheGET" | grep -c GET) -eq 1 ]]
-                then
-                    isGet="y"
-                else
-                    isGet="n"
-                fi
-                
-                echo "$container | $apacheIP | $apacheTime | $apacheGET | $apacheSMTH | $apacheID | $isGet" >> $apache_output
+                ((commandsNum++))
+                echo "$container | $attackerIP | $startTime | $username | $password | $noninteractive | $cmd" >> $cmds_output
+            done < <(zcat $file | grep -w "Noninteractive\|line" | sed 's/.*: //' | tr "['||','&&',';']" "\n" | sed '/^$/d' | sed 's/^[ ]//')
 
-            done < access.log          
+            #------------------------------------------------------------
+
+            # MITM Output
+            # Each line has data for each attacker, delimited by a | character.
+            echo "$container | $attackerIP | $startTime | $username | $password | $commandsNum | $noninteractive" >> $output_file
+
+            #------------------------------------------------------------
+
+            # APACHE ACCESS LOG DATA
+
+            # This is for the bug when there is no access.log in the zip file
+            touch access.log
+
+            # Only add a line if the access log is non-empty.
+            if [ $(wc -l < access.log) -ge 1 ]
+            then
+                while read -r line
+                do
+                    apacheIP=$(echo $line | cut -d' ' -f1)
+                    apacheTime=$(echo $line | cut -d'[' -f2 | cut -d']' -f1 | cut -d' ' -f1)
+                    apacheGET=$(echo $line | cut -d'"' -f2)
+                    apacheSMTH=$(echo $line | cut -d'"' -f4)
+                    apacheID=$(echo $line | cut -d'"' -f6)
+                    if [[ $(echo "$apacheGET" | grep -c GET) -eq 1 ]]
+                    then
+                        isGet="y"
+                    else
+                        isGet="n"
+                    fi
+
+                    echo "$container | $apacheIP | $apacheTime | $apacheGET | $apacheSMTH | $apacheID | $isGet" >> $apache_output
+
+                done < access.log          
+            fi
+
+            #------------------------------------------------------------
+
+            rm access.log
+            rm $file.gz
         fi
-        
-        #------------------------------------------------------------
-        
-        rm access.log
-        rm $file.gz
-
     fi
 done
