@@ -39,8 +39,8 @@ do
                 noninteractive="n"
             fi
 
-            username=$(zcat $file | head -n 9 | grep "Attacker Username" | cut -d" " -f3)
-            password=$(zcat $file | head -n 9 | grep "Attacker Password" | cut -d" " -f3)
+            username=$(zcat $file | head -n 9 | grep "Attacker Username" | cut -d" " -f3 | tr -d '|')
+            password=$(zcat $file | head -n 9 | grep "Attacker Password" | cut -d" " -f3 | tr -d '|')
 
             #------------------------------------------------------------
 
@@ -51,7 +51,7 @@ do
             do
                 ((commandsNum++))
                 echo "$container | $attackerIP | $startTime | $username | $password | $noninteractive | $cmd" >> $cmds_output
-            done < <(zcat $file | grep -w "Noninteractive\|line" | sed 's/.*: //' | tr "['||','&&',';']" "\n" | sed '/^$/d' | sed 's/^[ ]//')
+            done < <(zcat $file | grep -w "Noninteractive\|line" | sed 's/.*: //' | tr "['||','&&',';','|']" "\n" | sed '/^$/d' | sed 's/^[ ]//')
 
             #------------------------------------------------------------
 
@@ -73,9 +73,9 @@ do
                 do
                     apacheIP=$(echo $line | cut -d' ' -f1)
                     apacheTime=$(echo $line | cut -d'[' -f2 | cut -d']' -f1 | cut -d' ' -f1)
-                    apacheGET=$(echo $line | cut -d'"' -f2)
-                    apacheSMTH=$(echo $line | cut -d'"' -f4)
-                    apacheID=$(echo $line | cut -d'"' -f6)
+                    apacheGET=$(echo $line | cut -d'"' -f2 | tr -d '|')
+                    apacheSMTH=$(echo $line | cut -d'"' -f4 | tr -d '|')
+                    apacheID=$(echo $line | cut -d'"' -f6 | tr -d '|')
                     if [[ $(echo "$apacheGET" | grep -c GET) -eq 1 ]]
                     then
                         isGet="y"
