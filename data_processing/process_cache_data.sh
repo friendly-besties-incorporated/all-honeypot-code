@@ -57,6 +57,8 @@ do
             echo "$container | $attackerIP | $startTime | $username | $password | $commandsNum | $noninteractive" >> $output_file
 
             sudo mv $file /var/experiment_logs/prev_cache
+        else
+            sudo mv $file /var/experiment_logs/prev_cache_rejected
         fi
     fi
 done
