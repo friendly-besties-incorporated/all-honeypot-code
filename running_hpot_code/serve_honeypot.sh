@@ -77,7 +77,7 @@ function cleanup_honeypot()
   /bin/bash ./process_complete_container.sh "$TEMPLATE_CONTAINER_NAME" "$running_cont" "$log_name"
 
   # Undo any write-locked files
-  path_to_container="/var/lib/lxc/$cname/rootfs" 
+  path_to_container="/var/lib/lxc/$running_cont/rootfs" 
   sudo chattr -i -R $path_to_container
 
   # Delete the container
