@@ -1,0 +1,13 @@
+[Unit]
+Description=Cleans hpots upon reboot (service)
+
+[Service]
+Type=oneshot
+User=student
+EnvironmentFile=/etc/environment
+ExecStart=/bin/bash ./reboot_process_old.sh
+WorkingDirectory=/home/student/all-honeypot-code/running_hpot_code/start_up
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

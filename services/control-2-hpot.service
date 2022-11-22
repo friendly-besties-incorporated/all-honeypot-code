@@ -1,0 +1,20 @@
+[Unit]
+Description=Serves control 3 honeypot
+StartLimitBurst=1
+After=reboot-clean-hpot.service
+Requires=reboot-clean-hpot.service
+PartOf=hpot-control.target
+
+[Service]
+Type=simple
+RemainAfterExit=yes
+Restart=always
+RestartSec=5min
+User=student
+EnvironmentFile=/etc/environment
+ExecStart=/bin/bash ./serve_honeypot.sh "$CNAME_CONTROL" "$IP_CONTROL3" "$PORT_CONTROL3" "$INFACE" 3
+WorkingDirectory=/home/student/all-honeypot-code/running_hpot_code
+TimeoutSec=infinity
+
+[Install]
+WantedBy=multi-user.target

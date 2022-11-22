@@ -1,0 +1,20 @@
+[Unit]
+Description=Serves swipe honeypot
+StartLimitBurst=1
+PartOf=hpot-control.target
+After=reboot-clean-hpot.service
+Requires=reboot-clean-hpot.service
+
+[Service]
+Type=simple
+RemainAfterExit=yes
+Restart=always
+RestartSec=5min
+User=student
+EnvironmentFile=/etc/environment
+ExecStart=/bin/bash ./serve_honeypot.sh "$CNAME_IOTPAGE" "$IP_IOTPAGE" "$PORT_IOTPAGE" "$INFACE" 1
+WorkingDirectory=/home/student/all-honeypot-code/running_hpot_code
+TimeoutSec=infinity
+
+[Install]
+WantedBy=multi-user.target

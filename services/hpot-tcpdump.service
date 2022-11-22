@@ -1,0 +1,20 @@
+[Unit]
+Description=Honeypot TCP Dump Service
+StartLimitBurst=1
+After=reboot-clean-hpot.service
+Requires=reboot-clean-hpot.service
+PartOf=hpot-control.target
+
+[Service]
+Type=forking
+RemainAfterExit=yes
+Restart=always
+RestartSec=5min
+User=root
+EnvironmentFile=/etc/environment
+ExecStart=/bin/bash ./tcpdump_80.sh
+WorkingDirectory=/home/student/all-honeypot-code/running_hpot_code/cron_jobs
+TimeoutSec=infinity
+
+[Install]
+WantedBy=multi-user.target

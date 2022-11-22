@@ -1,0 +1,6 @@
+[Unit]
+Description=Starts all honeypot services
+Wants=control-hpot.service control-2-hpot.service control-3-hpot.service blank-hpot.service blank-2-hpot.service pwd-hpot.service pwd-2-hpot.service swipe-hpot.service swipe-2-hpot.service it-hpot.service it-2-hpot.service
+
+[Install]
+WantedBy=multi-user.target reboot-clean-hpot.service
